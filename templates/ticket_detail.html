@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工單詳情</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #1f4e79;
+            color: white;
+            padding: 16px 32px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #1f4e79;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin-right: 10px;
+            background-color: #1f4e79;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            background-color: #163a59;
+        }
+
+        .detail-box {
+            margin-top: 20px;
+            border: 1px solid #d9e2ec;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .detail-row {
+            display: flex;
+            border-bottom: 1px solid #e6edf5;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            width: 180px;
+            background-color: #eef4fa;
+            padding: 14px;
+            font-weight: bold;
+            color: #1f4e79;
+        }
+
+        .value {
+            flex: 1;
+            padding: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        AWS Ticket System
+    </div>
+
+    <div class="container">
+        <h1>工單詳情</h1>
+
+        <a href="/tickets" class="btn">回工單列表</a>
+        <a href="/" class="btn">回首頁</a>
+        <a href="/tickets/{{ ticket.id }}/edit" class="btn">編輯狀態</a>
+        <form action="/tickets/{{ ticket.id }}/delete" method="POST" style="display:inline;">
+            <button type="submit" class="btn" onclick="return confirm('確定要刪除這筆工單嗎？');">刪除工單</button>
+        </form>
+
+        <div class="detail-box">
+            <div class="detail-row">
+                <div class="label">工單 ID</div>
+                <div class="value">{{ ticket.id }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">問題標題</div>
+                <div class="value">{{ ticket.title }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">問題類別</div>
+                <div class="value">{{ ticket.category }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">優先級</div>
+                <div class="value">{{ ticket.priority }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">狀態</div>
+                <div class="value">{{ ticket.status }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">回報人姓名</div>
+                <div class="value">{{ ticket.reporter_name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">回報人 Email</div>
+                <div class="value">{{ ticket.reporter_email }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="label">問題描述</div>
+                <div class="value">{{ ticket.description }}</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

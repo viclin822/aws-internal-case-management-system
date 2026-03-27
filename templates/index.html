@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Ticket System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #1f4e79;
+            color: white;
+            padding: 16px 32px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #1f4e79;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .button-group {
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            margin-right: 12px;
+            background-color: #1f4e79;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #163a59;
+        }
+
+        .card {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #eef4fa;
+            border-left: 6px solid #1f4e79;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        AWS Ticket System
+    </div>
+
+    <div class="container">
+        <h1>客服問題回報／工單管理系統</h1>
+        <p>
+            這是一個使用 Flask 開發的個人雲端專題，目標是模擬企業常見的問題回報與工單管理流程。
+        </p>
+        <p>
+            後續將逐步加入工單建立、查詢、更新、刪除、資料庫整合，以及 AWS 雲端部署功能。
+        </p>
+
+        <div class="button-group">
+            <a href="/tickets" class="btn">查看工單列表</a>
+            <a href="/tickets/create" class="btn">新增工單</a>
+        </div>
+
+        <div class="card">
+            <strong>目前進度：</strong><br>
+            已完成 Flask 環境建置與首頁畫面。
+        </div>
+    </div>
+
+</body>
+</html>

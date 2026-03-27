@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯工單狀態</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #1f4e79;
+            color: white;
+            padding: 16px 32px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #1f4e79;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin-right: 10px;
+            background-color: #1f4e79;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #163a59;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cfd8e3;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .info-box {
+            background-color: #eef4fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        AWS Ticket System
+    </div>
+
+    <div class="container">
+        <h1>編輯工單狀態</h1>
+
+        <div class="info-box">
+            <strong>工單 ID：</strong> {{ ticket.id }}<br>
+            <strong>問題標題：</strong> {{ ticket.title }}
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="status">狀態</label>
+                <select id="status" name="status">
+                    <option value="待處理" {% if ticket.status == '待處理' %}selected{% endif %}>待處理</option>
+                    <option value="處理中" {% if ticket.status == '處理中' %}selected{% endif %}>處理中</option>
+                    <option value="已完成" {% if ticket.status == '已完成' %}selected{% endif %}>已完成</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">儲存變更</button>
+            <a href="/tickets/{{ ticket.id }}" class="btn">取消</a>
+        </form>
+    </div>
+
+</body>
+</html>
