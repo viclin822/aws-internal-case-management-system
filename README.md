@@ -4,8 +4,6 @@
 
 本專案為模擬企業內部客服案件管理流程所開發的 Web 應用系統，部署於 AWS EC2，採用 Flask + MySQL 架構，實作角色權限控管、案件生命週期管理、留言紀錄與稽核日誌等功能。
 
-開發目的：作為轉職 IT 的實戰作品集，展示雲端部署、後端開發與資料庫設計能力。
-
 ---
 
 ## 系統功能
@@ -50,35 +48,35 @@
 ---
 
 ## 資料庫設計
-```
-cases              # 主要案件資料表
-users              # 使用者帳號與角色
-case_comments      # 案件留言紀錄
-case_status_logs   # 狀態變更稽核日誌
-case_attachments   # 附件資料
-```
+
+| 資料表 | 說明 |
+|--------|------|
+| cases | 主要案件資料表 |
+| users | 使用者帳號與角色 |
+| case_comments | 案件留言紀錄 |
+| case_status_logs | 狀態變更稽核日誌 |
+| case_attachments | 附件資料 |
 
 ---
 
 ## 本機安裝與執行
-```bash
-# 1. Clone 專案
-git clone https://github.com/viclin822/aws-internal-case-management-system.git
-cd aws-internal-case-management-system
 
-# 2. 建立虛擬環境
-python3 -m venv venv
-source venv/bin/activate
+1. Clone 專案
+   git clone https://github.com/viclin822/aws-internal-case-management-system.git
+   cd aws-internal-case-management-system
 
-# 3. 安裝套件
-pip install -r requirements.txt
+2. 建立虛擬環境
+   python3 -m venv venv
+   source venv/bin/activate
 
-# 4. 設定資料庫（MySQL）
-mysql -u root -p < schema.sql
+3. 安裝套件
+   pip install -r requirements.txt
 
-# 5. 啟動應用
-python app.py
-```
+4. 設定資料庫（MySQL）
+   python3 init_db.py
+
+5. 啟動應用
+   python app.py
 
 ---
 
@@ -86,9 +84,9 @@ python app.py
 
 - **系統網址**：http://15.135.87.219:5000
 - **測試帳號**：
-  - Admin：`admin` / `admin123`
-  - Agent：`agent01` / `agent123`
-  - Submitter：`user01` / `user123`
+  - Admin：admin / admin123
+  - Agent：agent01 / agent123
+  - Submitter：user01 / user123
 
 ---
 
@@ -96,12 +94,13 @@ python app.py
 
 **林峻毅（Vic Lin）**
 - 國立臺北商業大學 資訊管理系 應屆畢業（2026/07）
-- TibaMe AWS 雲端工程師培訓（2026/07 結訓）
-- GitHub：[@viclin822](https://github.com/viclin822)
+- TibaMe AWS 雲端工程師培訓（2026/02 開始，2026/07 結訓）
+- GitHub：https://github.com/viclin822
 
 ---
 
 ## 開發背景
 
 本人具備 4 年以上平台客服與營運支援經驗，目前轉職 IT 領域。
-本專案結合過去的客服流程理解與新習得的雲端技術，實作出貼近實際企業需求的案件管理系統。
+
+由於 TibaMe 課程個人專題須於 2026/05/09 後才會正式開始，本專案並非課程指定作品，而是應徵期間自主開發的實戰作品集。結合過去 4 年客服流程的第一線經驗，獨立設計並實作此內部案件管理系統，涵蓋雲端部署、資料庫設計與後端開發全流程。
