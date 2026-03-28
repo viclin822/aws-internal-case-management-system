@@ -5,3 +5,8 @@ __pycache__/
 __pycache__/
 *.pyc
 database.db
+database.db
+app.log
+flask.log
+app.py.backup
+venv/
