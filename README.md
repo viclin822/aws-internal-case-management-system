@@ -1,37 +1,107 @@
-# AWS Internal Case Management System
+# AWS 雲端內部案件管理系統
 
-AWS 雲端內部案件管理系統
+## 專案簡介
 
-## 專案說明
-這個專案原本是我練習 Flask + MySQL 的基礎工單系統，先完成了工單新增、查詢、編輯、刪除等功能，並部署到 AWS EC2。
+本專案為模擬企業內部客服案件管理流程所開發的 Web 應用系統，部署於 AWS EC2，採用 Flask + MySQL 架構，實作角色權限控管、案件生命週期管理、留言紀錄與稽核日誌等功能。
 
-後續我打算把它升級成一套比較完整的「內部案件管理系統」，模擬公司內部提報、處理、追蹤案件的流程，也當作自己應徵系統開發及維運工程師的作品集專案。
+開發目的：作為轉職 IT 的實戰作品集，展示雲端部署、後端開發與資料庫設計能力。
 
-## 目前已完成
-- 工單列表 / 新增 / 詳情 / 編輯 / 刪除
-- 關鍵字搜尋與狀態篩選
-- RESTful API（GET / POST / PUT / DELETE）
-- AWS EC2 部署
-- MySQL 資料庫連線
-- 環境變數設定
+---
 
-## 預計升級方向
-- 三種角色：Submitter / Agent / Admin
-- Submitter 只能查看自己建立的案件
-- Agent 可查看全部案件、接手案件、更新狀態
-- Admin 負責少量管理功能
-- 附件上傳到 Amazon S3
-- 區分「對外可見處理說明」與「內部備註」
-- 補上案件操作紀錄
-- 加入基本 log / 監控概念
+## 系統功能
 
-## 使用技術
-- Python
-- Flask
-- MySQL
-- HTML / CSS
-- AWS EC2
-- Amazon S3（規劃中）
+### 角色權限（RBAC）
+- **Submitter（申請者）**：建立案件、查看自己的案件、新增留言
+- **Agent（客服人員）**：查看所有案件、更新案件狀態、新增內部/外部留言
+- **Admin（管理員）**：完整權限，包含刪除案件、管理使用者
 
-## 專案狀態
-目前是第一版，先把基本工單功能完成，接下來會往 AWS 內部案件管理系統的方向繼續升級。
+### 案件管理
+- 建立、查看、編輯、刪除案件
+- 案件狀態流程：待處理 → 處理中 → 待確認 → 已結案
+- 優先級設定（高 / 中 / 低）
+- 問題類別分類
+
+### 留言與稽核
+- 支援對外可見 / 內部備註兩種留言類型
+- 狀態變更自動寫入稽核日誌（case_status_logs）
+- 附件管理（case_attachments）
+
+---
+
+## 技術架構
+
+| 層級 | 技術 |
+|------|------|
+| 後端框架 | Python Flask |
+| 資料庫 | MySQL 8.0 |
+| 雲端平台 | AWS EC2（Ubuntu 24.04） |
+| 服務管理 | systemd |
+| 版本控制 | Git / GitHub |
+| 前端 | HTML / CSS（Jinja2 Template） |
+
+---
+
+## AWS 服務應用
+
+- **EC2**：部署 Flask 應用程式與 MySQL 資料庫
+- **Security Group**：設定 SSH（22）、HTTP（5000）存取規則
+- **Elastic IP**（可擴充）：固定對外 IP，避免重啟後 IP 變動
+
+---
+
+## 資料庫設計
+```
+cases              # 主要案件資料表
+users              # 使用者帳號與角色
+case_comments      # 案件留言紀錄
+case_status_logs   # 狀態變更稽核日誌
+case_attachments   # 附件資料
+```
+
+---
+
+## 本機安裝與執行
+```bash
+# 1. Clone 專案
+git clone https://github.com/viclin822/aws-internal-case-management-system.git
+cd aws-internal-case-management-system
+
+# 2. 建立虛擬環境
+python3 -m venv venv
+source venv/bin/activate
+
+# 3. 安裝套件
+pip install -r requirements.txt
+
+# 4. 設定資料庫（MySQL）
+mysql -u root -p < schema.sql
+
+# 5. 啟動應用
+python app.py
+```
+
+---
+
+## 線上展示
+
+- **系統網址**：http://15.135.87.219:5000
+- **測試帳號**：
+  - Admin：`admin` / `admin123`
+  - Agent：`agent01` / `agent123`
+  - Submitter：`user01` / `user123`
+
+---
+
+## 開發者
+
+**林志明（Vic Lin）**
+- 國立臺北商業大學 資訊管理系 應屆畢業（2026/07）
+- TibaMe AWS 雲端工程師培訓（2026/07 結訓）
+- GitHub：[@viclin822](https://github.com/viclin822)
+
+---
+
+## 開發背景
+
+本人具備 4 年以上平台客服與營運支援經驗，目前轉職 IT 領域。
+本專案結合過去的客服流程理解與新習得的雲端技術，實作出貼近實際企業需求的案件管理系統。

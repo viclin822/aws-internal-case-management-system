@@ -4,3 +4,4 @@ __pycache__/
 .DS_Storevenv/
 __pycache__/
 *.pyc
+database.db
