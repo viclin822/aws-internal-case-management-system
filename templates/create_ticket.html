@@ -3,143 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新增工單</title>
+    <title>新增案件 - AWS 雲端內部案件管理系統</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fb;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        .navbar {
-            background-color: #1f4e79;
-            color: white;
-            padding: 16px 32px;
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: linear-gradient(90deg, #2563eb, #4338ca);
+            color: #fff;
+            padding: 18px 24px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
+        }
+
+        .topbar h1 {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 800;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        .page-wrapper {
+            max-width: 980px;
+            margin: 36px auto;
+            padding: 0 20px 40px;
         }
 
-        h1 {
-            color: #1f4e79;
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
+        }
+
+        .header-title h2 {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1e3a8a;
+            margin-bottom: 6px;
+        }
+
+        .header-title p {
+            color: #64748b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            margin-right: 10px;
-            background-color: #1f4e79;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 15px;
             border: none;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 800;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4338ca);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #1d4ed8;
+            border: 1px solid #cbd5e1;
         }
 
         .btn:hover {
-            background-color: #163a59;
+            transform: translateY(-1px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #dbeafe;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
         }
 
         label {
-            display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
         }
 
-        input, textarea, select {
+        input, select, textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #cfd8e3;
-            border-radius: 8px;
-            font-size: 15px;
-            box-sizing: border-box;
+            border: 1px solid #dbe2ea;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 14px;
+            outline: none;
         }
 
         textarea {
+            min-height: 140px;
             resize: vertical;
-            min-height: 120px;
+            line-height: 1.7;
         }
 
-        .top-actions {
+        .hint {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .bottom-actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .flash-wrap {
             margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-warning {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div class="navbar">
-        AWS Ticket System
+    <div class="topbar">
+        <h1>AWS 雲端內部案件管理系統</h1>
     </div>
 
-    <div class="container">
-        <h1>新增工單</h1>
-
-        <div class="top-actions">
-            <a href="/" class="btn">回首頁</a>
-            <a href="/tickets" class="btn">查看工單列表</a>
+    <div class="page-wrapper">
+        <div class="flash-wrap">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </div>
 
-        <form method="POST">
-            <div class="form-group">
-                <label for="title">問題標題</label>
-                <input type="text" id="title" name="title" placeholder="請輸入問題標題">
+        <div class="header-row">
+            <div class="header-title">
+                <h2>新增案件</h2>
+                <p>填寫案件資料，提交內部處理需求</p>
             </div>
 
-            <div class="form-group">
-                <label for="category">問題類別</label>
-                <select id="category" name="category">
-                    <option value="">請選擇類別</option>
-                    <option value="帳號問題">帳號問題</option>
-                    <option value="上課問題">上課問題</option>
-                    <option value="教材問題">教材問題</option>
-                    <option value="系統問題">系統問題</option>
-                </select>
+            <div class="btn-group">
+                <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+                <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">返回案件列表</a>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="priority">優先級</label>
-                <select id="priority" name="priority">
-                    <option value="">請選擇優先級</option>
-                    <option value="高">高</option>
-                    <option value="中">中</option>
-                    <option value="低">低</option>
-                </select>
-            </div>
+        <div class="card">
+            <form method="POST" action="{{ url_for('create_ticket') }}">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="title">案件標題</label>
+                        <input type="text" id="title" name="title" required maxlength="150">
+                    </div>
 
-            <div class="form-group">
-                <label for="reporter_name">回報人姓名</label>
-                <input type="text" id="reporter_name" name="reporter_name" placeholder="請輸入姓名">
-            </div>
+                    <div class="form-group">
+                        <label for="category">問題類別</label>
+                        <select id="category" name="category" required>
+                            <option value="">請選擇</option>
+                            {% for item in categories %}
+                                <option value="{{ item }}">{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="reporter_email">回報人 Email</label>
-                <input type="email" id="reporter_email" name="reporter_email" placeholder="請輸入 Email">
-            </div>
+                    <div class="form-group">
+                        <label for="priority">優先級</label>
+                        <select id="priority" name="priority">
+                            {% for item in priority_options %}
+                                <option value="{{ item }}" {% if item == '中' %}selected{% endif %}>{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="description">問題描述</label>
-                <textarea id="description" name="description" placeholder="請輸入問題內容"></textarea>
-            </div>
+                    <div class="form-group">
+                        <label for="student_account">學員帳號</label>
+                        <input type="text" id="student_account" name="student_account" placeholder="例如：wes123456" required>
+                        <div class="hint">格式：wes + 6位數字</div>
+                    </div>
 
-            <button type="submit" class="btn">送出工單</button>
-        </form>
+                    <div class="form-group">
+                        <label for="student_name">學員姓名</label>
+                        <input type="text" id="student_name" name="student_name" maxlength="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacher_name">Tutor</label>
+                        <input type="text" id="teacher_name" name="teacher_name" maxlength="100" placeholder="請輸入老師英文名">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">提報部門</label>
+                        <input type="text" id="department" name="department" value="{{ current_user.department if current_user and current_user.department else '' }}">
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="description">案件內容說明</label>
+                        <textarea id="description" name="description" required placeholder="請輸入案件背景、問題內容、學員反映情況等"></textarea>
+                    </div>
+                </div>
+
+                <div class="bottom-actions">
+                    <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">取消</a>
+                    <button type="submit" class="btn btn-primary">送出案件</button>
+                </div>
+            </form>
+        </div>
     </div>
-
 </body>
 </html>

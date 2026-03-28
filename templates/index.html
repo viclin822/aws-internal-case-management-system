@@ -3,95 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Ticket System</title>
+    <title>AWS 雲端內部案件管理系統</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fb;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        .navbar {
-            background-color: #1f4e79;
-            color: white;
-            padding: 16px 32px;
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            width: 100%;
+            background: linear-gradient(90deg, #2563eb, #4338ca);
+            color: #fff;
+            padding: 18px 24px;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
+        }
+
+        .topbar h1 {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 800;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 52px auto;
+            padding: 0 20px;
         }
 
-        h1 {
-            color: #1f4e79;
-            margin-bottom: 10px;
+        .hero-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 28px;
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
+            padding: 42px;
         }
 
-        p {
-            color: #333;
-            line-height: 1.7;
+        .hero-title {
+            font-size: 30px;
+            font-weight: 900;
+            color: #1e3a8a;
+            margin-bottom: 12px;
         }
 
-        .button-group {
-            margin-top: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            margin-right: 12px;
-            background-color: #1f4e79;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
+        .hero-desc {
+            color: #64748b;
             font-size: 16px;
+            margin-bottom: 32px;
         }
 
-        .btn:hover {
-            background-color: #163a59;
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
         }
 
         .card {
-            margin-top: 30px;
+            background: #ffffffcc;
+            border: 1px solid #dbeafe;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #475569;
+            margin-bottom: 18px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .info-box {
+            border: 1px solid #bfdbfe;
+            border-radius: 18px;
+            background: #f8fbff;
+            padding: 18px;
+            min-height: 92px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            word-break: break-word;
+        }
+
+        .info-value.role-submitter {
+            color: #1d4ed8;
+        }
+
+        .info-value.role-agent {
+            color: #0f766e;
+        }
+
+        .info-value.role-admin {
+            color: #7c3aed;
+        }
+
+        .action-desc {
+            color: #64748b;
+            line-height: 1.8;
+            margin-bottom: 22px;
+            font-size: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 22px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #4338ca);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #1d4ed8;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 26px;
+        }
+
+        .stat-card {
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            border: 1px solid #dbeafe;
+            border-radius: 20px;
             padding: 20px;
-            background-color: #eef4fa;
-            border-left: 6px solid #1f4e79;
-            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1e3a8a;
+        }
+
+        .welcome-box {
+            margin-top: 24px;
+            background: #eef4ff;
+            border: 1px solid #bfdbfe;
+            color: #475569;
+            padding: 16px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .flash-wrap {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-warning {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-card {
+                padding: 26px 20px;
+                border-radius: 22px;
+            }
+
+            .hero-title {
+                font-size: 24px;
+            }
+
+            .topbar h1 {
+                font-size: 20px;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div class="navbar">
-        AWS Ticket System
+    <div class="topbar">
+        <h1>AWS 雲端內部案件管理系統</h1>
     </div>
 
-    <div class="container">
-        <h1>客服問題回報／工單管理系統</h1>
-        <p>
-            這是一個使用 Flask 開發的個人雲端專題，目標是模擬企業常見的問題回報與工單管理流程。
-        </p>
-        <p>
-            後續將逐步加入工單建立、查詢、更新、刪除、資料庫整合，以及 AWS 雲端部署功能。
-        </p>
-
-        <div class="button-group">
-            <a href="/tickets" class="btn">查看工單列表</a>
-            <a href="/tickets/create" class="btn">新增工單</a>
+    <div class="page-wrapper">
+        <div class="flash-wrap">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </div>
 
-        <div class="card">
-            <strong>目前進度：</strong><br>
-            已完成 Flask 環境建置與首頁畫面。
+        <div class="hero-card">
+            <div class="hero-title">AWS 雲端內部案件管理系統</div>
+            <div class="hero-desc">內部案件追蹤、處理狀態更新與歷程管理入口。</div>
+
+            <div class="main-grid">
+                <div class="card">
+                    <h3>目前登入資訊</h3>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <div class="info-label">登入者</div>
+                            <div class="info-value">
+                                {{ current_user.username if current_user and current_user.username else '-' }}
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-label">部門</div>
+                            <div class="info-value">
+                                {{ current_user.department if current_user and current_user.department else '-' }}
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-label">角色</div>
+                            <div class="info-value
+                                {% if current_user and current_user.role == 'submitter' %}role-submitter{% endif %}
+                                {% if current_user and current_user.role == 'agent' %}role-agent{% endif %}
+                                {% if current_user and current_user.role == 'admin' %}role-admin{% endif %}
+                            ">
+                                {% if current_user and current_user.role == 'submitter' %}
+                                    Submitter
+                                {% elif current_user and current_user.role == 'agent' %}
+                                    Agent
+                                {% elif current_user and current_user.role == 'admin' %}
+                                    Admin
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-label">可見範圍</div>
+                            <div class="info-value" style="font-size:16px;">
+                                {% if current_user and current_user.role == 'submitter' %}
+                                    僅可查看自己的案件
+                                {% else %}
+                                    可查看全部案件
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>快速操作</h3>
+                    <div class="action-desc">
+                        進入案件列表查看目前案件狀態，或新增案件提交新的處理需求。
+                    </div>
+
+                    <div class="btn-group">
+                        <a href="{{ url_for('ticket_list') }}" class="btn btn-primary">查看案件列表</a>
+                        <a href="{{ url_for('create_ticket') }}" class="btn btn-outline">新增案件</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger">登出</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">案件總數</div>
+                    <div class="stat-value">{{ total_cases }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">處理中 / 待追蹤</div>
+                    <div class="stat-value">{{ pending_cases }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">已結案</div>
+                    <div class="stat-value">{{ closed_cases }}</div>
+                </div>
+            </div>
+
+            <div class="welcome-box">
+                歡迎使用 AWS 雲端內部案件管理系統。此系統重點在於案件歷程紀錄與多人接續處理，而非單一承辦人模式。
+            </div>
         </div>
     </div>
-
 </body>
 </html>
