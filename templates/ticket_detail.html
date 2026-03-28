@@ -400,7 +400,7 @@
     <div class="topbar">
         <div>AWS 雲端內部案件管理系統</div>
         <div class="topbar-actions">
-            <a class="topbar-link" href="{{ url_for('home') }}">回首頁</a>
+            <a class="topbar-link" href="{{ url_for('index') }}">回首頁</a>
             <a class="topbar-link" href="{{ url_for('ticket_list') }}">案件列表</a>
         </div>
     </div>
@@ -414,11 +414,11 @@
 
             <div class="header-actions">
                 {% if user_role in ['agent', 'admin'] %}
-                <a class="btn btn-primary" href="{{ url_for('edit_ticket', ticket_id=ticket.id) }}">編輯案件</a>
+                <a class="btn btn-primary" href="{{ url_for('edit_ticket', case_id=case.id) }}">編輯案件</a>
                 {% endif %}
 
                 {% if user_role == 'admin' %}
-                <form method="POST" action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" style="margin: 0;">
+                <form method="POST" action="{{ url_for('delete_ticket', case_id=case.id) }}" style="margin: 0;">
                     <button class="btn btn-danger" type="submit" onclick="return confirm('確定要刪除此案件嗎？')">刪除案件</button>
                 </form>
                 {% endif %}
@@ -431,82 +431,82 @@
             <div class="detail-grid">
                 <div class="detail-item">
                     <div class="detail-label">案件編號</div>
-                    <div class="detail-value">{{ ticket.case_no or '-' }}</div>
+                    <div class="detail-value">{{ case.case_no or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">案件狀態</div>
                     <div class="detail-value">
-                        {% set status_class = ticket.status.replace('_', '-') %}
+                        {% set status_class = case.status.replace('_', '-') %}
                         <span class="badge badge-status-{{ status_class }}">
-                            {{ ticket.status_zh or ticket.status }}
+                            {{ case.status_zh or case.status }}
                         </span>
                     </div>
                 </div>
 
                 <div class="detail-item full">
                     <div class="detail-label">案件標題</div>
-                    <div class="detail-value">{{ ticket.title or '-' }}</div>
+                    <div class="detail-value">{{ case.title or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">問題類別</div>
-                    <div class="detail-value">{{ ticket.category or '-' }}</div>
+                    <div class="detail-value">{{ case.category or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">優先級</div>
                     <div class="detail-value">
-                        <span class="badge badge-priority-{{ ticket.priority }}">
-                            {{ ticket.priority_zh or ticket.priority }}
+                        <span class="badge badge-priority-{{ case.priority }}">
+                            {{ case.priority_zh or case.priority }}
                         </span>
                     </div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">學員姓名</div>
-                    <div class="detail-value">{{ ticket.student_name or '-' }}</div>
+                    <div class="detail-value">{{ case.student_name or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">學員帳號</div>
-                    <div class="detail-value">{{ ticket.student_account or '-' }}</div>
+                    <div class="detail-value">{{ case.student_account or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">老師名稱</div>
-                    <div class="detail-value">{{ ticket.tutor_name or '-' }}</div>
+                    <div class="detail-value">{{ case.tutor_name or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">提報者</div>
-                    <div class="detail-value">{{ ticket.submitter_name or '-' }}</div>
+                    <div class="detail-value">{{ case.submitter_name or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">建立時間</div>
-                    <div class="detail-value light">{{ ticket.created_at or '-' }}</div>
+                    <div class="detail-value light">{{ case.created_at or '-' }}</div>
                 </div>
 
                 <div class="detail-item">
                     <div class="detail-label">最後更新時間</div>
-                    <div class="detail-value light">{{ ticket.updated_at or '-' }}</div>
+                    <div class="detail-value light">{{ case.updated_at or '-' }}</div>
                 </div>
 
                 <div class="detail-item full">
                     <div class="detail-label">問題描述</div>
-                    <div class="detail-value light">{{ ticket.description or '-' }}</div>
+                    <div class="detail-value light">{{ case.description or '-' }}</div>
                 </div>
 
                 <div class="detail-item full">
                     <div class="detail-label">對外可見處理說明</div>
-                    <div class="detail-value light">{{ ticket.public_note or '目前尚無對外說明。' }}</div>
+                    <div class="detail-value light">{{ case.public_note or '目前尚無對外說明。' }}</div>
                 </div>
 
                 {% if user_role in ['agent', 'admin'] %}
                 <div class="detail-item full">
                     <div class="detail-label">內部備註</div>
-                    <div class="detail-value light">{{ ticket.internal_note or '目前尚無內部備註。' }}</div>
+                    <div class="detail-value light">{{ case.internal_note or '目前尚無內部備註。' }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -535,7 +535,7 @@
         <div class="card section">
             <div class="section-title">新增留言</div>
 
-            <form method="POST" action="{{ url_for('create_comment', ticket_id=ticket.id) }}">
+            <form method="POST" action="{{ url_for('add_comment', case_id=case.id) }}">
                 <div class="form-grid">
                     {% if user_role in ['agent', 'admin'] %}
                     <div class="field-group">

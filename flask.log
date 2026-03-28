@@ -1,0 +1,36 @@
+nohup: ignoring input
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.29.46:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 102-657-095
+111.71.213.67 - - [28/Mar/2026 14:58:34] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:40] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:45] "GET /tickets/create HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:48] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:49] "GET /tickets?status=&category=&keyword= HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:51] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:58:52] "[32mGET /logout HTTP/1.1[0m" 302 -
+111.71.213.67 - - [28/Mar/2026 14:58:53] "GET /login HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:59:06] "[32mPOST /login HTTP/1.1[0m" 302 -
+111.71.213.67 - - [28/Mar/2026 14:59:06] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:59:18] "[32mPOST /login HTTP/1.1[0m" 302 -
+111.71.213.67 - - [28/Mar/2026 14:59:18] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:59:24] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 14:59:32] "GET /tickets/create HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:03:58] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:00] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:01] "[32mGET /logout HTTP/1.1[0m" 302 -
+111.71.213.67 - - [28/Mar/2026 15:04:01] "GET /login HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:16] "[32mPOST /login HTTP/1.1[0m" 302 -
+111.71.213.67 - - [28/Mar/2026 15:04:16] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:51] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:58] "GET / HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:04:59] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:14:59] "GET /tickets HTTP/1.1" 200 -
+111.71.213.67 - - [28/Mar/2026 15:20:24] "GET /tickets HTTP/1.1" 200 -

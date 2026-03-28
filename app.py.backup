@@ -1,0 +1,318 @@
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+import mysql.connector
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+import os
+
+app = Flask(__name__)
+app.json.ensure_ascii = False
+
+# secret key 從環境變數讀，別寫死在這裡
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-this")
+
+
+# --- DB 連線 ---
+
+def get_db_connection():
+    # 帳密從環境變數拿，本機開發可以在 .env 設定
+    return mysql.connector.connect(
+        host=os.environ.get("DB_HOST", "localhost"),
+        user=os.environ.get("DB_USER", "root"),
+        password=os.environ.get("DB_PASSWORD", ""),
+        database=os.environ.get("DB_NAME", "aws_ticket_system")
+    )
+
+
+# --- 登入驗證裝飾器 ---
+
+def login_required(f):
+    # 沒登入就踢回登入頁，加在需要保護的 route 上面
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ====================
+# 登入 / 登出
+# ====================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user and check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"]
+            session["username"] = user["username"]
+            session["role"] = user["role"]
+            return redirect(url_for("ticket_list"))
+
+        error = "帳號或密碼錯誤"
+
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+# ====================
+# 首頁
+# ====================
+
+@app.route("/")
+@login_required
+def home():
+    return render_template("index.html")
+
+
+# ====================
+# 網頁路由（Jinja2 渲染 HTML）
+# ====================
+
+@app.route("/tickets")
+@login_required
+def ticket_list():
+    keyword = request.args.get("keyword", "").strip()
+    status = request.args.get("status", "").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = "SELECT * FROM tickets WHERE 1=1"
+    params = []
+
+    if keyword:
+        sql += " AND title LIKE %s"
+        params.append(f"%{keyword}%")
+
+    if status:
+        sql += " AND status = %s"
+        params.append(status)
+
+    sql += " ORDER BY id ASC"
+    cursor.execute(sql, params)
+    tickets = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("tickets.html", tickets=tickets, keyword=keyword, status=status)
+
+
+@app.route("/tickets/create", methods=["GET", "POST"])
+@login_required
+def create_ticket():
+    if request.method == "POST":
+        title = request.form["title"]
+        category = request.form["category"]
+        priority = request.form["priority"]
+        reporter_name = request.form["reporter_name"]
+        reporter_email = request.form["reporter_email"]
+        description = request.form["description"]
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO tickets (title, category, priority, status, reporter_name, reporter_email, description)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (title, category, priority, "待處理", reporter_name, reporter_email, description))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for("ticket_list"))
+
+    return render_template("create_ticket.html")
+
+
+@app.route("/tickets/<int:ticket_id>")
+@login_required
+def ticket_detail(ticket_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tickets WHERE id = %s", (ticket_id,))
+    ticket = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if ticket is None:
+        return "找不到該工單", 404
+
+    return render_template("ticket_detail.html", ticket=ticket)
+
+
+@app.route("/tickets/<int:ticket_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_ticket(ticket_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == "POST":
+        new_status = request.form["status"]
+        cursor.execute("UPDATE tickets SET status = %s WHERE id = %s", (new_status, ticket_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return redirect(url_for("ticket_detail", ticket_id=ticket_id))
+
+    cursor.execute("SELECT * FROM tickets WHERE id = %s", (ticket_id,))
+    ticket = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if ticket is None:
+        return "找不到該工單", 404
+
+    return render_template("edit_ticket.html", ticket=ticket)
+
+
+@app.route("/tickets/<int:ticket_id>/delete", methods=["POST"])
+@login_required
+def delete_ticket(ticket_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tickets WHERE id = %s", (ticket_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for("ticket_list"))
+
+
+# ====================
+# RESTful API（回傳 JSON）
+# ====================
+
+@app.route("/api/tickets", methods=["GET"])
+@login_required
+def api_ticket_list():
+    keyword = request.args.get("keyword", "").strip()
+    status = request.args.get("status", "").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = "SELECT * FROM tickets WHERE 1=1"
+    params = []
+
+    if keyword:
+        sql += " AND title LIKE %s"
+        params.append(f"%{keyword}%")
+
+    if status:
+        sql += " AND status = %s"
+        params.append(status)
+
+    sql += " ORDER BY id ASC"
+    cursor.execute(sql, params)
+    tickets = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(tickets)
+
+
+@app.route("/api/tickets/<int:ticket_id>", methods=["GET"])
+@login_required
+def api_ticket_detail(ticket_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM tickets WHERE id = %s", (ticket_id,))
+    ticket = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if ticket is None:
+        return jsonify({"error": "找不到該工單"}), 404
+
+    return jsonify(ticket)
+
+
+@app.route("/api/tickets", methods=["POST"])
+@login_required
+def api_create_ticket():
+    data = request.get_json()
+    title = data.get("title")
+    category = data.get("category")
+    priority = data.get("priority")
+    reporter_name = data.get("reporter_name")
+    reporter_email = data.get("reporter_email")
+    description = data.get("description")
+
+    if not all([title, category, priority, reporter_name, reporter_email, description]):
+        return jsonify({"error": "缺少必要欄位"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO tickets (title, category, priority, status, reporter_name, reporter_email, description)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (title, category, priority, "待處理", reporter_name, reporter_email, description))
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "工單新增成功", "ticket_id": new_id}), 201
+
+
+@app.route("/api/tickets/<int:ticket_id>", methods=["PUT"])
+@login_required
+def api_update_ticket(ticket_id):
+    data = request.get_json()
+    new_status = data.get("status")
+
+    if not new_status:
+        return jsonify({"error": "缺少 status 欄位"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM tickets WHERE id = %s", (ticket_id,))
+    if cursor.fetchone() is None:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "找不到該工單"}), 404
+
+    cursor.execute("UPDATE tickets SET status = %s WHERE id = %s", (new_status, ticket_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "狀態更新成功", "ticket_id": ticket_id, "new_status": new_status})
+
+
+@app.route("/api/tickets/<int:ticket_id>", methods=["DELETE"])
+@login_required
+def api_delete_ticket(ticket_id):
+    # 補齊 RESTful DELETE，讓 API 完整支援 CRUD
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM tickets WHERE id = %s", (ticket_id,))
+    if cursor.fetchone() is None:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "找不到該工單"}), 404
+
+    cursor.execute("DELETE FROM tickets WHERE id = %s", (ticket_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "工單刪除成功", "ticket_id": ticket_id}), 200
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
