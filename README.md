@@ -82,11 +82,11 @@
 
 ## 線上展示
 
-- **系統網址**：http://15.135.87.219:5000
+- **系統網址**：http://13.54.242.189:5000
 - **測試帳號**：
   - Admin：admin / admin123
   - Agent：agent01 / agent123
-  - Submitter：user01 / user123
+  - Submitter：submitter01 / submitter123
 
 ---
 
