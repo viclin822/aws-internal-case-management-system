@@ -94,7 +94,7 @@ python app.py
 
 ## 開發者
 
-**林志明（Vic Lin）**
+**林峻毅（Vic Lin）**
 - 國立臺北商業大學 資訊管理系 應屆畢業（2026/07）
 - TibaMe AWS 雲端工程師培訓（2026/07 結訓）
 - GitHub：[@viclin822](https://github.com/viclin822)
