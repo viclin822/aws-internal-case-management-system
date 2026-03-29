@@ -190,6 +190,7 @@ def index():
     return render_template(
         "index.html",
         current_user=current_user,
+        user_role=current_user["role"],
         total_cases=total_cases,
         pending_cases=pending_cases,
         closed_cases=closed_cases,
@@ -254,6 +255,7 @@ def ticket_list():
     return render_template(
         "ticket_list.html",
         current_user=current_user,
+        user_role=current_user["role"],
         cases=cases,
         categories=CATEGORIES,
         status_options=STATUS_OPTIONS,
@@ -286,6 +288,7 @@ def create_ticket():
             return render_template(
                 "create_ticket.html",
                 current_user=current_user,
+        user_role=current_user["role"],
                 categories=CATEGORIES,
                 priority_options=PRIORITY_OPTIONS
             )
@@ -295,6 +298,7 @@ def create_ticket():
             return render_template(
                 "create_ticket.html",
                 current_user=current_user,
+        user_role=current_user["role"],
                 categories=CATEGORIES,
                 priority_options=PRIORITY_OPTIONS
             )
@@ -348,6 +352,7 @@ def create_ticket():
     return render_template(
         "create_ticket.html",
         current_user=current_user,
+        user_role=current_user["role"],
         categories=CATEGORIES,
         priority_options=PRIORITY_OPTIONS
     )
@@ -410,6 +415,7 @@ def ticket_detail(case_id):
     return render_template(
         "ticket_detail.html",
         current_user=current_user,
+        user_role=current_user["role"],
         case=case,
         attachments=attachments,
         comments=comments,
@@ -536,6 +542,7 @@ def edit_ticket(case_id):
         "edit_ticket.html",
         case=case,
         current_user=current_user,
+        user_role=current_user["role"],
         categories=CATEGORIES,
         priority_options=PRIORITY_OPTIONS,
         status_options=STATUS_OPTIONS,
@@ -610,4 +617,4 @@ def internal_server_error(e):
 # Run App
 # =========================
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

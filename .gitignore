@@ -1,4 +1,12 @@
 .env
 __pycache__/
 *.pyc
-.DS_Store
+.DS_Storevenv/
+__pycache__/
+*.pyc
+database.db
+database.db
+app.log
+flask.log
+app.py.backup
+venv/
