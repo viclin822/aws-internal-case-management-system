@@ -5,277 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新增案件 - AWS 雲端內部案件管理系統</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-            background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%);
-            color: #1f2937;
-            min-height: 100vh;
-        }
-
-        .topbar {
-            background: linear-gradient(90deg, #2563eb, #4338ca);
-            color: #fff;
-            padding: 18px 24px;
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
-        }
-
-        .topbar h1 {
-            font-size: 24px;
-            font-weight: 800;
-        }
-
-        .page-wrapper {
-            max-width: 980px;
-            margin: 36px auto;
-            padding: 0 20px 40px;
-        }
-
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .header-title h2 {
-            font-size: 28px;
-            font-weight: 900;
-            color: #1e3a8a;
-            margin-bottom: 6px;
-        }
-
-        .header-title p {
-            color: #64748b;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 14px;
-            padding: 12px 18px;
-            font-size: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #4338ca);
-            color: #fff;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
-        }
-
-        .btn-outline {
-            background: #fff;
-            color: #1d4ed8;
-            border: 1px solid #cbd5e1;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid #dbeafe;
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #475569;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            border: 1px solid #dbe2ea;
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-size: 14px;
-            outline: none;
-        }
-
-        textarea {
-            min-height: 140px;
-            resize: vertical;
-            line-height: 1.7;
-        }
-
-        .hint {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .bottom-actions {
-            margin-top: 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .flash-wrap {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .alert-success {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
-        }
-
-        .alert-danger {
-            background: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-warning {
-            background: #fff7ed;
-            color: #c2410c;
-            border: 1px solid #fed7aa;
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%); color: #1f2937; min-height: 100vh; }
+        .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); }
+        .topbar h1 { font-size: 24px; font-weight: 800; }
+        .page-wrapper { max-width: 980px; margin: 36px auto; padding: 0 20px 40px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+        .header-title h2 { font-size: 28px; font-weight: 900; color: #1e3a8a; margin-bottom: 6px; }
+        .header-title p { color: #64748b; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { border: none; border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #4338ca); color: #fff; box-shadow: 0 10px 24px rgba(37,99,235,0.22); }
+        .btn-outline { background: #fff; color: #1d4ed8; border: 1px solid #cbd5e1; }
+        .btn:hover { transform: translateY(-1px); }
+        .card { background: rgba(255,255,255,0.92); border: 1px solid #dbeafe; border-radius: 24px; padding: 24px; box-shadow: 0 18px 40px rgba(15,23,42,0.06); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #475569; }
+        input, select, textarea { width: 100%; border: 1px solid #dbe2ea; border-radius: 14px; padding: 12px 14px; font-size: 14px; outline: none; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96,165,250,0.15); }
+        textarea { min-height: 140px; resize: vertical; line-height: 1.7; }
+        .hint { margin-top: 6px; font-size: 12px; color: #94a3b8; }
+        .priority-hint { margin-top: 8px; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; display: none; }
+        .priority-hint.high { background: #fee2e2; color: #991b1b; display: block; }
+        .priority-hint.mid { background: #fef9c3; color: #854d0e; display: block; }
+        .priority-hint.low { background: #dcfce7; color: #166534; display: block; }
+        .checkbox-group { grid-column: 1 / -1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 16px 18px; }
+        .checkbox-row { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; border-radius: 6px; cursor: pointer; accent-color: #f59e0b; flex-shrink: 0; }
+        .checkbox-group label { margin: 0; font-size: 14px; font-weight: 700; color: #92400e; cursor: pointer; }
+        .refund-desc { margin-top: 10px; font-size: 12px; color: #b45309; line-height: 1.7; padding: 8px 12px; background: #fef3c7; border-radius: 8px; border-left: 3px solid #f59e0b; }
+        .upload-group { grid-column: 1 / -1; background: #f8faff; border: 2px dashed #93c5fd; border-radius: 14px; padding: 18px 16px; }
+        .upload-group label { font-size: 14px; font-weight: 700; color: #1d4ed8; margin-bottom: 10px; display: block; }
+        .upload-group input[type="file"] { border: none; padding: 0; font-size: 14px; background: transparent; }
+        .upload-hint { margin-top: 8px; font-size: 12px; color: #64748b; }
+        .bottom-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+        .flash-wrap { margin-bottom: 20px; }
+        .alert { padding: 14px 16px; border-radius: 14px; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .alert-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .alert-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .alert-warning { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <h1>AWS 雲端內部案件管理系統</h1>
+<div class="topbar"><h1>AWS 雲端內部案件管理系統</h1></div>
+<div class="page-wrapper">
+    <div class="flash-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
     </div>
-
-    <div class="page-wrapper">
-        <div class="flash-wrap">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+    <div class="header-row">
+        <div class="header-title">
+            <h2>新增案件</h2>
+            <p>填寫案件資料，提交內部處理需求</p>
         </div>
-
-        <div class="header-row">
-            <div class="header-title">
-                <h2>新增案件</h2>
-                <p>填寫案件資料，提交內部處理需求</p>
-            </div>
-
-            <div class="btn-group">
-                <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
-                <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">返回案件列表</a>
-            </div>
+        <div class="btn-group">
+            <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+            <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">返回案件列表</a>
         </div>
+    </div>
+    <div class="card">
+        <form method="POST" action="{{ url_for('create_ticket') }}" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label for="title">案件標題</label>
+                    <input type="text" id="title" name="title" required maxlength="150">
+                </div>
+                <div class="form-group">
+                    <label for="category">問題類別</label>
+                    <select id="category" name="category" required onchange="autoSetPriority()">
+                        <option value="">請選擇</option>
+                        {% for item in categories %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="priority-hint" id="priorityHint"></div>
+                </div>
+                <div class="form-group">
+                    <label for="priority">優先級</label>
+                    <select id="priority" name="priority">
+                        {% for item in priority_options %}
+                            <option value="{{ item }}" {% if item == '中' %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student_account">學員帳號</label>
+                    <input type="text" id="student_account" name="student_account" placeholder="例如：wes123456" required>
+                    <div class="hint">格式：wes + 6位數字</div>
+                </div>
+                <div class="form-group">
+                    <label for="student_name">學員姓名</label>
+                    <input type="text" id="student_name" name="student_name" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="teacher_name">Tutor</label>
+                    <input type="text" id="teacher_name" name="teacher_name" maxlength="100" placeholder="請輸入老師英文名">
+                </div>
+                <div class="form-group">
+                    <label for="department">提報部門</label>
+                    <input type="text" id="department" name="department" value="{{ current_user.department if current_user and current_user.department else '' }}">
+                </div>
+                <div class="form-group full">
+                    <label for="description">案件內容說明</label>
+                    <textarea id="description" name="description" required placeholder="請輸入案件背景、問題內容、學員反映情況等"></textarea>
+                </div>
 
-        <div class="card">
-            <form method="POST" action="{{ url_for('create_ticket') }}">
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label for="title">案件標題</label>
-                        <input type="text" id="title" name="title" required maxlength="150">
+                <div class="checkbox-group">
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="refund_points" name="refund_points">
+                        <label for="refund_points">是否歸還點數</label>
                     </div>
-
-                    <div class="form-group">
-                        <label for="category">問題類別</label>
-                        <select id="category" name="category" required>
-                            <option value="">請選擇</option>
-                            {% for item in categories %}
-                                <option value="{{ item }}">{{ item }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="priority">優先級</label>
-                        <select id="priority" name="priority">
-                            {% for item in priority_options %}
-                                <option value="{{ item }}" {% if item == '中' %}selected{% endif %}>{{ item }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="student_account">學員帳號</label>
-                        <input type="text" id="student_account" name="student_account" placeholder="例如：wes123456" required>
-                        <div class="hint">格式：wes + 6位數字</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="student_name">學員姓名</label>
-                        <input type="text" id="student_name" name="student_name" maxlength="50">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="teacher_name">Tutor</label>
-                        <input type="text" id="teacher_name" name="teacher_name" maxlength="100" placeholder="請輸入老師英文名">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="department">提報部門</label>
-                        <input type="text" id="department" name="department" value="{{ current_user.department if current_user and current_user.department else '' }}">
-                    </div>
-
-                    <div class="form-group full">
-                        <label for="description">案件內容說明</label>
-                        <textarea id="description" name="description" required placeholder="請輸入案件背景、問題內容、學員反映情況等"></textarea>
+                    <div class="refund-desc">
+                        💡 勾選此項表示此案件需要歸還學員點數。適用於以下情況：老師無故缺席、平台系統異常導致課堂中斷、課程品質嚴重不符等需補償學員的情形。
                     </div>
                 </div>
 
-                <div class="bottom-actions">
-                    <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">取消</a>
-                    <button type="submit" class="btn btn-primary">送出案件</button>
+                <div class="upload-group">
+                    <label>📎 上傳附件（選填）</label>
+                    <input type="file" name="attachments" multiple accept=".png,.jpg,.jpeg,.gif,.mp4,.mov,.pdf,.doc,.docx">
+                    <div class="upload-hint">支援圖片（jpg/png/gif）、影片（mp4/mov）、文件（pdf/doc/docx），可一次選多個檔案</div>
                 </div>
-            </form>
-        </div>
+            </div>
+            <div class="bottom-actions">
+                <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">取消</a>
+                <button type="submit" class="btn btn-primary">送出案件</button>
+            </div>
+        </form>
     </div>
+</div>
+<script>
+    const HIGH_PRIORITY = ["老師言語騷擾／不當行為","退費爭議","帳號違規（私自轉讓他人使用）","投訴消基會／消保會","7天鑑賞期學員上課不滿意（退費風險）"];
+    const MID_PRIORITY = ["老師上課品質不佳（打瞌睡／不認真）","老師情緒問題／態度不良","老師無故缺席（放鴿子）","老師頻繁斷線","系統異常／平台問題"];
+    const LOW_PRIORITY = ["錄影檔問題（不完整／未上傳）","課後評語／報告未上傳","老師異動／代課不接受","教材問題","其他"];
+    function autoSetPriority() {
+        const category = document.getElementById('category').value;
+        const prioritySelect = document.getElementById('priority');
+        const hint = document.getElementById('priorityHint');
+        hint.className = 'priority-hint';
+        hint.textContent = '';
+        if (HIGH_PRIORITY.includes(category)) {
+            prioritySelect.value = '高';
+            hint.className = 'priority-hint high';
+            hint.textContent = '🔴 此類別自動設為高優先級，請盡速處理';
+        } else if (MID_PRIORITY.includes(category)) {
+            prioritySelect.value = '中';
+            hint.className = 'priority-hint mid';
+            hint.textContent = '🟡 此類別為中優先級';
+        } else if (LOW_PRIORITY.includes(category)) {
+            prioritySelect.value = '低';
+            hint.className = 'priority-hint low';
+            hint.textContent = '🟢 此類別為低優先級';
+        }
+    }
+</script>
 </body>
 </html>

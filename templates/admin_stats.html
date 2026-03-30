@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI 報表 - AWS 雲端內部案件管理系統</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%); color: #1f2937; min-height: 100vh; }
+        .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); }
+        .topbar h1 { font-size: 24px; font-weight: 800; }
+        .page-wrapper { max-width: 960px; margin: 36px auto; padding: 0 20px 40px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+        .header-title h2 { font-size: 28px; font-weight: 900; color: #1e3a8a; margin-bottom: 6px; }
+        .header-title p { color: #64748b; }
+        .btn { border: none; border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .btn-outline { background: #fff; color: #1d4ed8; border: 1px solid #cbd5e1; }
+        .btn:hover { transform: translateY(-1px); }
+        .card { background: rgba(255,255,255,0.92); border: 1px solid #dbeafe; border-radius: 24px; padding: 32px; box-shadow: 0 18px 40px rgba(15,23,42,0.06); margin-bottom: 24px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .card-title { font-size: 18px; font-weight: 800; color: #1e3a8a; }
+        .period-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .period-tab { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; border: 1px solid #dbeafe; background: #f8fbff; color: #475569; transition: all 0.15s; }
+        .period-tab.active { background: linear-gradient(135deg, #2563eb, #4338ca); color: #fff; border-color: transparent; }
+        .period-tab:hover:not(.active) { background: #eef4ff; }
+        .chart-container { position: relative; height: 340px; }
+        .flash-wrap { margin-bottom: 20px; }
+        .alert { padding: 14px 16px; border-radius: 14px; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .alert-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .empty-box { text-align: center; padding: 42px 20px; color: #64748b; background: #f8fbff; border: 1px dashed #cbd5e1; border-radius: 18px; }
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 28px; }
+        .rank-table th, .rank-table td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #eef2f7; font-size: 14px; }
+        .rank-table thead { background: #eef4ff; }
+        .rank-table th { color: #334155; font-weight: 800; }
+        .rank-table td { color: #475569; }
+        .rank-1 { color: #f59e0b; }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #b45309; }
+        .bar-fill { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #2563eb, #6366f1); display: inline-block; min-width: 4px; }
+    </style>
+</head>
+<body>
+<div class="topbar"><h1>AWS 雲端內部案件管理系統</h1></div>
+<div class="page-wrapper">
+    <div class="flash-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="header-row">
+        <div class="header-title">
+            <h2>📊 KPI 報表</h2>
+            <p>各客服人員已結案件數量統計</p>
+        </div>
+        <a href="{{ url_for('ticket_list') }}" class="btn btn-outline">返回案件列表</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">客服結案數量排行</div>
+            <div class="period-tabs">
+                {% for val, label in period_options %}
+                <a href="{{ url_for('admin_stats', period=val) }}"
+                   class="period-tab {% if selected_period == val %}active{% endif %}">{{ label }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if agent_stats and agent_stats|length > 0 %}
+        <div class="chart-container">
+            <canvas id="kpiChart"></canvas>
+        </div>
+        <table class="rank-table">
+            <thead>
+                <tr><th>排名</th><th>客服人員</th><th>已結案件數</th><th>占比</th></tr>
+            </thead>
+            <tbody>
+                {% set total = agent_stats | sum(attribute='closed_count') %}
+                {% for agent in agent_stats %}
+                <tr>
+                    <td>
+                        <span class="{% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}" style="font-weight:900; font-size:16px;">
+                            {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                        </span>
+                    </td>
+                    <td><strong>{{ agent.username }}</strong></td>
+                    <td><strong>{{ agent.closed_count }}</strong> 件</td>
+                    <td>
+                        {% if total > 0 %}
+                            {% set pct = ((agent.closed_count / total) * 100) | round(1) %}
+                            <span class="bar-fill" style="width:{{ [pct * 1.5, 120] | min }}px"></span>
+                            <span style="margin-left:8px; font-size:13px; color:#64748b;">{{ pct }}%</span>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-box">此區間尚無結案資料。</div>
+        {% endif %}
+    </div>
+</div>
+
+{% if agent_stats and agent_stats|length > 0 %}
+<script>
+const agents = {{ agent_stats | tojson }};
+const labels = agents.map(a => a.username);
+const counts = agents.map(a => a.closed_count);
+const colors = ['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f43f5e','#f97316','#eab308','#22c55e'];
+new Chart(document.getElementById('kpiChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: '已結案件數', data: counts, backgroundColor: colors.slice(0, labels.length), borderRadius: 10, borderSkipped: false }] },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` 已結案：${c.parsed.y} 件` } } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+    }
+});
+</script>
+{% endif %}
+</body>
+</html>
