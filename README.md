@@ -50,7 +50,6 @@
 
 ![架構圖](docs/architecture.png)
 
-詳細架構請參考：[docs/architecture.html](docs/architecture.html)
 
 ### AWS 服務架構
 
