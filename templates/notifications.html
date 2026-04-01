@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知中心 - AWS 雲端內部案件管理系統</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%); color: #1f2937; min-height: 100vh; }
+        .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); display: flex; align-items: center; justify-content: space-between; }
+        .topbar h1 { font-size: 24px; font-weight: 800; }
+        .topbar-right { display: flex; align-items: center; }
+        .page-wrapper { max-width: 760px; margin: 36px auto; padding: 0 20px 40px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .header-row h2 { font-size: 26px; font-weight: 900; color: #1e3a8a; }
+        .btn { border: none; border-radius: 14px; padding: 10px 18px; font-size: 14px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .btn-outline { background: #fff; color: #1d4ed8; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { transform: translateY(-1px); }
+        .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 10px; }
+        .flash-wrap { margin-bottom: 16px; }
+        .alert { padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .alert-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .alert-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .notif-list { display: flex; flex-direction: column; gap: 10px; }
+        .notif-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-left: 4px solid #2563eb; transition: box-shadow 0.2s; }
+        .notif-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+        .notif-card.read { border-left-color: #e2e8f0; background: #f8fafc; }
+        .notif-content { flex: 1; }
+        .notif-badges { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+        .badge-new_case { background: #dcfce7; color: #166534; }
+        .badge-status_update { background: #dbeafe; color: #1d4ed8; }
+        .badge-new_comment { background: #fef9c3; color: #854d0e; }
+        .badge-refund_update { background: #e0f2fe; color: #075985; }
+        .badge-unread { background: #fee2e2; color: #991b1b; }
+        .notif-msg { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+        .notif-case { font-size: 12px; color: #64748b; }
+        .notif-time { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+        .notif-action { flex-shrink: 0; }
+        .empty-box { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-text { font-size: 16px; }
+        /* 鈴鐺 */
+        .notif-btn { position: relative; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #fff; }
+        .notif-btn:hover { background: rgba(255,255,255,0.25); }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+        .notif-dropdown { position: absolute; top: 52px; right: 0; width: 340px; max-height: 420px; overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,0.15); border: 1px solid #e2e8f0; z-index: 9999; display: none; }
+        .notif-dropdown.open { display: block; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+        .notif-header strong { font-size: 14px; color: #1e3a8a; }
+        .notif-read-all-btn { font-size: 12px; color: #64748b; cursor: pointer; background: none; border: none; text-decoration: underline; }
+        .notif-item { display: block; padding: 12px 16px; border-bottom: 1px solid #f8fafc; color: inherit; transition: background 0.15s; border-left: 3px solid #2563eb; width: 100%; text-align: left; background: none; cursor: pointer; font-family: inherit; }
+        .notif-item:hover { background: #f8fbff; }
+        .notif-type-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; display: inline-block; }
+        .type-new_case { background: #dcfce7; color: #166534; }
+        .type-status_update { background: #dbeafe; color: #1d4ed8; }
+        .type-new_comment { background: #fef9c3; color: #854d0e; }
+        .type-refund_update { background: #e0f2fe; color: #075985; }
+        .notif-dropdown-msg { font-size: 13px; color: #334155; font-weight: 600; margin: 2px 0; }
+        .notif-dropdown-time { font-size: 11px; color: #94a3b8; }
+        .notif-dropdown-empty { padding: 32px 16px; text-align: center; color: #94a3b8; font-size: 14px; }
+        .notif-footer { padding: 10px 16px; text-align: center; }
+        .notif-footer a { font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 700; }
+        .notif-wrap { position: relative; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>AWS 雲端內部案件管理系統</h1>
+    <div class="topbar-right">
+        <div class="notif-wrap">
+            <button class="notif-btn" onclick="toggleNotif()" id="notifBtn">🔔<span class="notif-badge" id="notifBadge"></span></button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header"><strong>通知</strong><button class="notif-read-all-btn" onclick="readAll()">全部已讀</button></div>
+                <div id="notifList"><div class="notif-dropdown-empty">載入中...</div></div>
+                <div class="notif-footer"><a href="/notifications">查看全部通知</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="flash-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="header-row">
+        <h2>🔔 通知中心</h2>
+        <div style="display:flex;gap:10px;align-items:center;">
+            {% if notifications %}
+            <form method="POST" action="/notifications/read_all">
+                <button type="submit" class="btn btn-outline btn-sm">全部標為已讀</button>
+            </form>
+            {% endif %}
+            <a href="/tickets" class="btn btn-outline btn-sm">返回案件列表</a>
+            <a href="/" class="btn btn-outline btn-sm">返回首頁</a>
+        </div>
+    </div>
+
+    {% if not notifications %}
+    <div class="empty-box">
+        <div class="empty-icon">🔕</div>
+        <div class="empty-text">目前沒有任何通知</div>
+    </div>
+    {% else %}
+    <div class="notif-list">
+        {% for n in notifications %}
+        <div class="notif-card {% if n.is_read %}read{% endif %}">
+            <div class="notif-content">
+                <div class="notif-badges">
+                    <span class="badge badge-{{ n.event_type }}">
+                        {% if n.event_type == 'new_case' %}新案件
+                        {% elif n.event_type == 'status_update' %}狀態更新
+                        {% elif n.event_type == 'new_comment' %}新留言
+                        {% elif n.event_type == 'refund_update' %}歸還點數
+                        {% else %}通知{% endif %}
+                    </span>
+                    {% if not n.is_read %}<span class="badge badge-unread">未讀</span>{% endif %}
+                </div>
+                <div class="notif-msg">{{ n.message }}</div>
+                {% if n.case_title %}<div class="notif-case">案件：{{ n.case_title }}</div>{% endif %}
+                <div class="notif-time">{{ n.created_at.strftime('%Y/%m/%d %H:%M') if n.created_at else '' }}</div>
+            </div>
+            <div class="notif-action">
+                <form method="POST" action="/notifications/{{ n.id }}/read">
+                    <button type="submit" class="btn btn-outline btn-sm">查看案件</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+const typeLabel = {'new_case':['新案件','type-new_case'],'status_update':['狀態更新','type-status_update'],'new_comment':['新留言','type-new_comment'],'refund_update':['歸還點數','type-refund_update']};
+function toggleNotif() { const dd = document.getElementById('notifDropdown'); dd.classList.toggle('open'); if (dd.classList.contains('open')) loadNotif(); }
+function loadNotif() {
+    fetch('/notifications/unread').then(r=>r.json()).then(data=>{
+        const badge = document.getElementById('notifBadge'); const list = document.getElementById('notifList');
+        if (data.count > 0) { badge.textContent = data.count > 9 ? '9+' : data.count; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }
+        if (!data.notifications.length) { list.innerHTML = '<div class="notif-dropdown-empty">🔕 沒有新通知</div>'; return; }
+        list.innerHTML = data.notifications.map(n => { const [label, cls] = typeLabel[n.event_type] || ['通知','type-status_update']; return `<form method="POST" action="/notifications/${n.id}/read" style="margin:0;"><button type="submit" class="notif-item"><span class="notif-type-badge ${cls}">${label}</span><div class="notif-dropdown-msg">${n.message}</div><div class="notif-dropdown-time">${n.created_at}${n.case_title ? ' · ' + n.case_title : ''}</div></button></form>`; }).join('');
+    }).catch(()=>{});
+}
+function readAll() { fetch('/notifications/read_all',{method:'POST'}).then(()=>{ document.getElementById('notifBadge').style.display='none'; document.getElementById('notifList').innerHTML='<div class="notif-dropdown-empty">🔕 沒有新通知</div>'; location.reload(); }); }
+document.addEventListener('click', function(e) { const wrap = document.getElementById('notifBtn').closest('.notif-wrap'); if (!wrap.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open'); });
+fetch('/notifications/unread').then(r=>r.json()).then(data=>{ if(data.count>0){const b=document.getElementById('notifBadge');b.textContent=data.count>9?'9+':data.count;b.style.display='flex';}}).catch(()=>{});
+</script>
+</body>
+</html>

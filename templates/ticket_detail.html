@@ -7,8 +7,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f7faff 45%, #f3f6fb 100%); color: #0f172a; min-height: 100vh; }
         .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); display: flex; align-items: center; justify-content: space-between; }
+        .topbar-left { display: flex; align-items: center; gap: 20px; }
         .topbar-title { font-size: 24px; font-weight: 800; }
         .topbar-actions { display: flex; gap: 10px; }
+        .topbar-right { display: flex; align-items: center; }
         .topbar-btn { color: #fff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 9px 16px; border-radius: 12px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; }
         .topbar-btn:hover { background: rgba(255,255,255,0.25); }
         .page { max-width: 1200px; margin: 32px auto; padding: 0 24px 48px; }
@@ -36,14 +38,10 @@
         .status-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .status-btn { padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 800; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
         .status-btn.active { border-color: #1d4ed8; transform: scale(1.05); }
-        .status-btn-待處理 { background: #dbeafe; color: #1d4ed8; }
-        .status-btn-待處理:hover { background: #bfdbfe; }
-        .status-btn-處理中 { background: #fef9c3; color: #854d0e; }
-        .status-btn-處理中:hover { background: #fef08a; }
-        .status-btn-待追蹤 { background: #fee2e2; color: #991b1b; }
-        .status-btn-待追蹤:hover { background: #fecaca; }
-        .status-btn-已結案 { background: #f1f5f9; color: #475569; }
-        .status-btn-已結案:hover { background: #e2e8f0; }
+        .status-btn-待處理 { background: #dbeafe; color: #1d4ed8; } .status-btn-待處理:hover { background: #bfdbfe; }
+        .status-btn-處理中 { background: #fef9c3; color: #854d0e; } .status-btn-處理中:hover { background: #fef08a; }
+        .status-btn-待追蹤 { background: #fee2e2; color: #991b1b; } .status-btn-待追蹤:hover { background: #fecaca; }
+        .status-btn-已結案 { background: #f1f5f9; color: #475569; } .status-btn-已結案:hover { background: #e2e8f0; }
         .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border-radius: 14px; font-size: 14px; font-weight: 800; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s ease; }
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background: linear-gradient(135deg, #2563eb, #4338ca); color: #fff; box-shadow: 0 8px 20px rgba(37,99,235,0.2); }
@@ -85,15 +83,49 @@
         .upload-zone label { font-size: 14px; font-weight: 700; color: #1d4ed8; margin-bottom: 10px; display: block; }
         .upload-zone input[type="file"] { font-size: 14px; }
         .upload-hint { margin-top: 8px; font-size: 12px; color: #64748b; }
+        /* 鈴鐺 */
+        .notif-btn { position: relative; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #fff; }
+        .notif-btn:hover { background: rgba(255,255,255,0.25); }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+        .notif-dropdown { position: absolute; top: 52px; right: 0; width: 340px; max-height: 420px; overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,0.15); border: 1px solid #e2e8f0; z-index: 9999; display: none; }
+        .notif-dropdown.open { display: block; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+        .notif-header strong { font-size: 14px; color: #1e3a8a; }
+        .notif-read-all { font-size: 12px; color: #64748b; cursor: pointer; background: none; border: none; text-decoration: underline; }
+        .notif-item { display: block; padding: 12px 16px; border-bottom: 1px solid #f8fafc; color: inherit; transition: background 0.15s; border-left: 3px solid #2563eb; width: 100%; text-align: left; background: none; cursor: pointer; font-family: inherit; }
+        .notif-item:hover { background: #f8fbff; }
+        .notif-type-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; display: inline-block; }
+        .type-new_case { background: #dcfce7; color: #166534; }
+        .type-status_update { background: #dbeafe; color: #1d4ed8; }
+        .type-new_comment { background: #fef9c3; color: #854d0e; }
+        .type-refund_update { background: #e0f2fe; color: #075985; }
+        .notif-msg { font-size: 13px; color: #334155; font-weight: 600; margin: 2px 0; }
+        .notif-time { font-size: 11px; color: #94a3b8; }
+        .notif-empty { padding: 32px 16px; text-align: center; color: #94a3b8; font-size: 14px; }
+        .notif-footer { padding: 10px 16px; text-align: center; }
+        .notif-footer a { font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 700; }
+        .notif-wrap { position: relative; }
         @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="topbar">
-    <div class="topbar-title">AWS 雲端內部案件管理系統</div>
-    <div class="topbar-actions">
-        <a class="topbar-btn" href="{{ url_for('index') }}">🏠 首頁</a>
-        <a class="topbar-btn" href="{{ url_for('ticket_list') }}">📋 案件列表</a>
+    <div class="topbar-left">
+        <div class="topbar-title">AWS 雲端內部案件管理系統</div>
+        <div class="topbar-actions">
+            <a class="topbar-btn" href="{{ url_for('index') }}">🏠 首頁</a>
+            <a class="topbar-btn" href="{{ url_for('ticket_list') }}">📋 案件列表</a>
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="notif-wrap">
+            <button class="notif-btn" onclick="toggleNotif()" id="notifBtn">🔔<span class="notif-badge" id="notifBadge"></span></button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header"><strong>通知</strong><button class="notif-read-all" onclick="readAll()">全部已讀</button></div>
+                <div id="notifList"><div class="notif-empty">載入中...</div></div>
+                <div class="notif-footer"><a href="/notifications">查看全部通知</a></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -142,24 +174,15 @@
                     {% else %}<span class="badge badge-green">{{ case.priority }}</span>{% endif %}
                 </div>
             </div>
-            <div class="detail-item full">
-                <div class="detail-label">案件標題</div>
-                <div class="detail-value">{{ case.title or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">問題類別</div>
-                <div class="detail-value">{{ case.category or '-' }}</div>
-            </div>
+            <div class="detail-item full"><div class="detail-label">案件標題</div><div class="detail-value">{{ case.title or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">問題類別</div><div class="detail-value">{{ case.category or '-' }}</div></div>
             <div class="detail-item">
                 <div class="detail-label">是否歸還點數</div>
                 <div class="detail-value">
                     {% if current_user.role in ['agent', 'admin'] %}
                     <form method="POST" action="{{ url_for('toggle_refund', case_id=case.id) }}" style="display:inline;">
-                        {% if case.refund_points %}
-                            <button type="submit" class="refund-badge refund-yes" style="cursor:pointer;">✅ 已歸還（點擊取消）</button>
-                        {% else %}
-                            <button type="submit" class="refund-badge refund-no" style="cursor:pointer;">❌ 未歸還（點擊標記）</button>
-                        {% endif %}
+                        {% if case.refund_points %}<button type="submit" class="refund-badge refund-yes" style="cursor:pointer;">✅ 已歸還（點擊取消）</button>
+                        {% else %}<button type="submit" class="refund-badge refund-no" style="cursor:pointer;">❌ 未歸還（點擊標記）</button>{% endif %}
                     </form>
                     {% else %}
                         {% if case.refund_points %}<span class="refund-badge refund-yes">✅ 是</span>
@@ -167,38 +190,14 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="detail-item">
-                <div class="detail-label">學員帳號</div>
-                <div class="detail-value">{{ case.student_account or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">學員姓名</div>
-                <div class="detail-value">{{ case.student_name or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Tutor</div>
-                <div class="detail-value">{{ case.teacher_name or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">提報部門</div>
-                <div class="detail-value">{{ case.department or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">提報者</div>
-                <div class="detail-value">{{ case.submitter_name or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">建立時間</div>
-                <div class="detail-value">{{ case.created_at or '-' }}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">最後更新</div>
-                <div class="detail-value">{{ case.updated_at or '-' }}</div>
-            </div>
-            <div class="detail-item full">
-                <div class="detail-label">案件內容說明</div>
-                <div class="detail-value">{{ case.description or '-' }}</div>
-            </div>
+            <div class="detail-item"><div class="detail-label">學員帳號</div><div class="detail-value">{{ case.student_account or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">學員姓名</div><div class="detail-value">{{ case.student_name or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">Tutor</div><div class="detail-value">{{ case.teacher_name or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">提報部門</div><div class="detail-value">{{ case.department or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">提報者</div><div class="detail-value">{{ case.submitter_name or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">建立時間</div><div class="detail-value">{{ case.created_at or '-' }}</div></div>
+            <div class="detail-item"><div class="detail-label">最後更新</div><div class="detail-value">{{ case.updated_at or '-' }}</div></div>
+            <div class="detail-item full"><div class="detail-label">案件內容說明</div><div class="detail-value">{{ case.description or '-' }}</div></div>
         </div>
     </div>
 
@@ -209,12 +208,7 @@
             {% for att in attachments %}
             <div class="attachment-item">
                 <div class="attachment-info">
-                    <div class="attachment-icon">
-                        {% if att.file_type in ['jpg','jpeg','png','gif'] %}🖼️
-                        {% elif att.file_type in ['mp4','mov'] %}🎬
-                        {% elif att.file_type == 'pdf' %}📄
-                        {% else %}📁{% endif %}
-                    </div>
+                    <div class="attachment-icon">{% if att.file_type in ['jpg','jpeg','png','gif'] %}🖼️{% elif att.file_type in ['mp4','mov'] %}🎬{% elif att.file_type == 'pdf' %}📄{% else %}📁{% endif %}</div>
                     <div>
                         <a class="attachment-name" href="{{ url_for('view_attachment', attachment_id=att.id) }}" target="_blank">{{ att.file_name }}</a>
                         <div class="attachment-meta">{{ att.created_at }}</div>
@@ -230,17 +224,13 @@
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="empty-state">目前尚無附件。</div>
-        {% endif %}
+        {% else %}<div class="empty-state">目前尚無附件。</div>{% endif %}
         <div class="upload-zone">
             <form method="POST" action="{{ url_for('upload_attachment', case_id=case.id) }}" enctype="multipart/form-data">
                 <label>＋ 補傳附件</label>
                 <input type="file" name="attachments" multiple accept=".png,.jpg,.jpeg,.gif,.mp4,.mov,.pdf,.doc,.docx">
                 <div class="upload-hint">支援圖片（jpg/png/gif）、影片（mp4/mov）、文件（pdf/doc/docx）</div>
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-primary" style="margin-top:12px;">上傳</button>
-                </div>
+                <div class="btn-group"><button type="submit" class="btn btn-primary" style="margin-top:12px;">上傳</button></div>
             </form>
         </div>
     </div>
@@ -265,9 +255,7 @@
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="empty-state">目前尚無留言紀錄。</div>
-        {% endif %}
+        {% else %}<div class="empty-state">目前尚無留言紀錄。</div>{% endif %}
     </div>
 
     <div class="card">
@@ -309,33 +297,98 @@
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="empty-state">目前尚無狀態歷程。</div>
-        {% endif %}
+        {% else %}<div class="empty-state">目前尚無狀態歷程。</div>{% endif %}
     </div>
 </div>
 
 <script>
-    function setCommentType(type) {
-        document.getElementById('commentTypeInput').value = type;
-        const btnExternal = document.getElementById('btnExternal');
-        const btnInternal = document.getElementById('btnInternal');
-        const submitBtn = document.getElementById('submitBtn');
-        const label = document.getElementById('commentLabel');
-        if (type === 'internal') {
-            btnExternal.className = 'type-btn inactive';
-            btnInternal.className = 'type-btn active-internal';
-            submitBtn.className = 'btn btn-internal';
-            submitBtn.textContent = '送出內部備註';
-            label.textContent = '內部備註內容（僅客服可見）';
-        } else {
-            btnExternal.className = 'type-btn active-external';
-            btnInternal.className = 'type-btn inactive';
-            submitBtn.className = 'btn btn-primary';
-            submitBtn.textContent = '送出留言';
-            label.textContent = '留言內容';
-        }
+function setCommentType(type) {
+    document.getElementById('commentTypeInput').value = type;
+    const btnExternal = document.getElementById('btnExternal');
+    const btnInternal = document.getElementById('btnInternal');
+    const submitBtn = document.getElementById('submitBtn');
+    const label = document.getElementById('commentLabel');
+    if (type === 'internal') {
+        btnExternal.className = 'type-btn inactive';
+        btnInternal.className = 'type-btn active-internal';
+        submitBtn.className = 'btn btn-internal';
+        submitBtn.textContent = '送出內部備註';
+        label.textContent = '內部備註內容（僅客服可見）';
+    } else {
+        btnExternal.className = 'type-btn active-external';
+        btnInternal.className = 'type-btn inactive';
+        submitBtn.className = 'btn btn-primary';
+        submitBtn.textContent = '送出留言';
+        label.textContent = '留言內容';
     }
+}
+
+const typeLabel = {
+    'new_case': ['新案件', 'type-new_case'],
+    'status_update': ['狀態更新', 'type-status_update'],
+    'new_comment': ['新留言', 'type-new_comment'],
+    'refund_update': ['歸還點數', 'type-refund_update']
+};
+
+function toggleNotif() {
+    const dd = document.getElementById('notifDropdown');
+    dd.classList.toggle('open');
+    if (dd.classList.contains('open')) loadNotif();
+}
+
+function loadNotif() {
+    fetch('/notifications/unread')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList');
+            if (data.count > 0) {
+                badge.textContent = data.count > 9 ? '9+' : data.count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+            if (!data.notifications.length) {
+                list.innerHTML = '<div class="notif-empty">🔕 沒有新通知</div>';
+                return;
+            }
+            list.innerHTML = data.notifications.map(n => {
+                const [label, cls] = typeLabel[n.event_type] || ['通知', 'type-status_update'];
+                return `<form method="POST" action="/notifications/${n.id}/read" style="margin:0;">
+                    <button type="submit" class="notif-item">
+                        <span class="notif-type-badge ${cls}">${label}</span>
+                        <div class="notif-msg">${n.message}</div>
+                        <div class="notif-time">${n.created_at}${n.case_title ? ' · ' + n.case_title : ''}</div>
+                    </button>
+                </form>`;
+            }).join('');
+        })
+        .catch(() => {});
+}
+
+function readAll() {
+    fetch('/notifications/read_all', { method: 'POST' })
+        .then(() => {
+            document.getElementById('notifBadge').style.display = 'none';
+            document.getElementById('notifList').innerHTML = '<div class="notif-empty">🔕 沒有新通知</div>';
+        });
+}
+
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('notifBtn').closest('.notif-wrap');
+    if (!wrap.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
+});
+
+fetch('/notifications/unread')
+    .then(r => r.json())
+    .then(data => {
+        if (data.count > 0) {
+            const b = document.getElementById('notifBadge');
+            b.textContent = data.count > 9 ? '9+' : data.count;
+            b.style.display = 'flex';
+        }
+    })
+    .catch(() => {});
 </script>
 </body>
 </html>

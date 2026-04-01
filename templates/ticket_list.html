@@ -8,8 +8,9 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f5f7fb 45%, #f0f4ff 100%); color: #1f2937; min-height: 100vh; }
-        .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); }
+        .topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 18px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); display: flex; align-items: center; justify-content: space-between; }
         .topbar h1 { font-size: 24px; font-weight: 800; }
+        .topbar-right { display: flex; align-items: center; }
         .page-wrapper { max-width: 1220px; margin: 36px auto; padding: 0 20px 40px; }
         .header-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
         .header-title h2 { font-size: 28px; font-weight: 900; color: #1e3a8a; margin-bottom: 6px; }
@@ -56,11 +57,44 @@
         .alert-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
         .alert-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
         .alert-warning { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .notif-btn { position: relative; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .notif-btn:hover { background: rgba(255,255,255,0.25); }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+        .notif-dropdown { position: absolute; top: 52px; right: 0; width: 340px; max-height: 420px; overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,0.15); border: 1px solid #e2e8f0; z-index: 9999; display: none; }
+        .notif-dropdown.open { display: block; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+        .notif-header strong { font-size: 14px; color: #1e3a8a; }
+        .notif-read-all { font-size: 12px; color: #64748b; cursor: pointer; background: none; border: none; text-decoration: underline; }
+        .notif-item { display: block; padding: 12px 16px; border-bottom: 1px solid #f8fafc; text-decoration: none; color: inherit; transition: background 0.15s; border-left: 3px solid #2563eb; width: 100%; text-align: left; background: none; cursor: pointer; font-family: inherit; }
+        .notif-item:hover { background: #f8fbff; }
+        .notif-type-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; display: inline-block; }
+        .type-new_case { background: #dcfce7; color: #166534; }
+        .type-status_update { background: #dbeafe; color: #1d4ed8; }
+        .type-new_comment { background: #fef9c3; color: #854d0e; }
+        .type-refund_update { background: #e0f2fe; color: #075985; }
+        .notif-msg { font-size: 13px; color: #334155; font-weight: 600; margin: 2px 0; }
+        .notif-time { font-size: 11px; color: #94a3b8; }
+        .notif-empty { padding: 32px 16px; text-align: center; color: #94a3b8; font-size: 14px; }
+        .notif-footer { padding: 10px 16px; text-align: center; }
+        .notif-footer a { font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 700; }
+        .notif-wrap { position: relative; }
         @media (max-width: 980px) { .filter-grid { grid-template-columns: 1fr; } .table-wrap { overflow-x: auto; } .chart-canvas-wrap { width: 180px; height: 180px; } }
     </style>
 </head>
 <body>
-<div class="topbar"><h1>AWS 雲端內部案件管理系統</h1></div>
+<div class="topbar">
+    <h1>AWS 雲端內部案件管理系統</h1>
+    <div class="topbar-right">
+        <div class="notif-wrap">
+            <button class="notif-btn" onclick="toggleNotif()" id="notifBtn">🔔<span class="notif-badge" id="notifBadge"></span></button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header"><strong>通知</strong><button class="notif-read-all" onclick="readAll()">全部已讀</button></div>
+                <div id="notifList"><div class="notif-empty">載入中...</div></div>
+                <div class="notif-footer"><a href="/notifications">查看全部通知</a></div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="page-wrapper">
     <div class="flash-wrap">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -74,29 +108,21 @@
             <h2>案件列表</h2>
             <p>
                 {% if current_user.role == 'submitter' %}目前僅顯示你所提報的案件{% else %}目前顯示全部案件{% endif %}
-                {% if selected_period %}
-                    {% for val, label in period_options %}
-                        {% if val == selected_period %}<span class="period-tag">{{ label }}</span>{% endif %}
-                    {% endfor %}
-                {% endif %}
+                {% if selected_period %}{% for val, label in period_options %}{% if val == selected_period %}<span class="period-tag">{{ label }}</span>{% endif %}{% endfor %}{% endif %}
             </p>
         </div>
         <div class="btn-group">
             <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
-            {% if current_user.role == 'admin' %}
-                <a href="{{ url_for('admin_stats') }}" class="btn btn-outline">📊 KPI 報表</a>
-            {% endif %}
+            {% if current_user.role == 'admin' %}<a href="{{ url_for('admin_stats') }}" class="btn btn-outline">📊 KPI 報表</a>{% endif %}
             <a href="{{ url_for('create_ticket') }}" class="btn btn-primary">新增案件</a>
         </div>
     </div>
-
     <div class="card">
         <div class="chart-header">
             <div class="card-title" style="margin-bottom:0;">📊 問題類別占比</div>
             <div class="period-tabs">
                 {% for val, label in period_options %}
-                <a href="{{ url_for('ticket_list', period=val, status=selected_status, category=selected_category, keyword=keyword) }}"
-                   class="period-tab {% if selected_period == val %}active{% endif %}">{{ label }}</a>
+                <a href="{{ url_for('ticket_list', period=val, status=selected_status, category=selected_category, keyword=keyword) }}" class="period-tab {% if selected_period == val %}active{% endif %}">{{ label }}</a>
                 {% endfor %}
             </div>
         </div>
@@ -105,53 +131,22 @@
             <div class="chart-canvas-wrap"><canvas id="categoryChart"></canvas></div>
             <div class="chart-legend" id="chartLegend"></div>
         </div>
-        {% else %}
-        <div class="no-data">此區間尚無案件資料</div>
-        {% endif %}
+        {% else %}<div class="no-data">此區間尚無案件資料</div>{% endif %}
     </div>
-
     <div class="card">
         <form method="GET" action="{{ url_for('ticket_list') }}">
             <input type="hidden" name="period" value="{{ selected_period }}">
             <div class="filter-grid">
-                <div>
-                    <label for="status">案件狀態</label>
-                    <select name="status" id="status">
-                        <option value="">全部</option>
-                        {% for item in status_options %}
-                            <option value="{{ item }}" {% if selected_status == item %}selected{% endif %}>{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="category">問題類別</label>
-                    <select name="category" id="category">
-                        <option value="">全部</option>
-                        {% for item in categories %}
-                            <option value="{{ item }}" {% if selected_category == item %}selected{% endif %}>{{ item }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="keyword">關鍵字搜尋</label>
-                    <input type="text" id="keyword" name="keyword" value="{{ keyword or '' }}" placeholder="標題 / 學員帳號 / 學員姓名 / Tutor / 內容">
-                </div>
-                <div style="display:flex; align-items:flex-end;">
-                    <button type="submit" class="btn btn-primary" style="width:100%;">查詢</button>
-                </div>
+                <div><label for="status">案件狀態</label><select name="status" id="status"><option value="">全部</option>{% for item in status_options %}<option value="{{ item }}" {% if selected_status == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+                <div><label for="category">問題類別</label><select name="category" id="category"><option value="">全部</option>{% for item in categories %}<option value="{{ item }}" {% if selected_category == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+                <div><label for="keyword">關鍵字搜尋</label><input type="text" id="keyword" name="keyword" value="{{ keyword or '' }}" placeholder="標題 / 學員帳號 / 學員姓名 / Tutor / 內容"></div>
+                <div style="display:flex; align-items:flex-end;"><button type="submit" class="btn btn-primary" style="width:100%;">查詢</button></div>
             </div>
         </form>
         {% if cases and cases|length > 0 %}
         <div class="table-wrap">
             <table>
-                <thead>
-                    <tr>
-                        <th>案件編號</th><th>案件標題</th><th>問題類別</th><th>學員資訊</th>
-                        <th>優先級</th><th>案件狀態</th>
-                        {% if current_user.role != 'submitter' %}<th>提報者</th>{% endif %}
-                        <th>建立時間</th><th>操作</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>案件編號</th><th>案件標題</th><th>問題類別</th><th>學員資訊</th><th>優先級</th><th>案件狀態</th>{% if current_user.role != 'submitter' %}<th>提報者</th>{% endif %}<th>建立時間</th><th>操作</th></tr></thead>
                 <tbody>
                     {% for case in cases %}
                     <tr>
@@ -159,11 +154,7 @@
                         <td class="title-cell">{{ case.title }}</td>
                         <td class="nowrap">{{ case.category }}</td>
                         <td class="nowrap">{{ case.student_account }}{% if case.student_name %}<br>{{ case.student_name }}{% endif %}</td>
-                        <td class="nowrap">
-                            {% if case.priority == '低' %}<span class="badge badge-priority-low">低</span>
-                            {% elif case.priority == '中' %}<span class="badge badge-priority-mid">中</span>
-                            {% else %}<span class="badge badge-priority-high">高</span>{% endif %}
-                        </td>
+                        <td class="nowrap">{% if case.priority == '低' %}<span class="badge badge-priority-low">低</span>{% elif case.priority == '中' %}<span class="badge badge-priority-mid">中</span>{% else %}<span class="badge badge-priority-high">高</span>{% endif %}</td>
                         <td class="nowrap"><span class="badge badge-status">{{ case.status }}</span></td>
                         {% if current_user.role != 'submitter' %}<td class="nowrap">{{ case.submitter_name or '-' }}</td>{% endif %}
                         <td class="nowrap">{{ case.created_at }}</td>
@@ -173,12 +164,9 @@
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="empty-box">目前沒有符合條件的案件資料。</div>
-        {% endif %}
+        {% else %}<div class="empty-box">目前沒有符合條件的案件資料。</div>{% endif %}
     </div>
 </div>
-
 {% if category_stats and category_stats|length > 0 %}
 <script>
 const rawStats = {{ category_stats | tojson }};
@@ -192,11 +180,23 @@ new Chart(document.getElementById('categoryChart').getContext('2d'), {
     options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}：${c.parsed} 件 (${((c.parsed/total)*100).toFixed(1)}%)` } } } }
 });
 const legendEl = document.getElementById('chartLegend');
-labels.forEach((label, i) => {
-    const pct = ((counts[i]/total)*100).toFixed(1);
-    legendEl.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div><span class="legend-label">${label}</span><span class="legend-count">${counts[i]} 件 (${pct}%)</span></div>`;
-});
+labels.forEach((label, i) => { const pct = ((counts[i]/total)*100).toFixed(1); legendEl.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div><span class="legend-label">${label}</span><span class="legend-count">${counts[i]} 件 (${pct}%)</span></div>`; });
 </script>
 {% endif %}
+<script>
+const typeLabel = {'new_case':['新案件','type-new_case'],'status_update':['狀態更新','type-status_update'],'new_comment':['新留言','type-new_comment'],'refund_update':['歸還點數','type-refund_update']};
+function toggleNotif() { const dd = document.getElementById('notifDropdown'); dd.classList.toggle('open'); if (dd.classList.contains('open')) loadNotif(); }
+function loadNotif() {
+    fetch('/notifications/unread').then(r=>r.json()).then(data=>{
+        const badge = document.getElementById('notifBadge'); const list = document.getElementById('notifList');
+        if (data.count > 0) { badge.textContent = data.count > 9 ? '9+' : data.count; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }
+        if (data.notifications.length === 0) { list.innerHTML = '<div class="notif-empty">🔕 沒有新通知</div>'; return; }
+        list.innerHTML = data.notifications.map(n => { const [label, cls] = typeLabel[n.event_type] || ['通知','type-status_update']; return `<form method="POST" action="/notifications/${n.id}/read" style="margin:0;"><button type="submit" class="notif-item"><span class="notif-type-badge ${cls}">${label}</span><div class="notif-msg">${n.message}</div><div class="notif-time">${n.created_at}${n.case_title ? ' · ' + n.case_title : ''}</div></button></form>`; }).join('');
+    }).catch(()=>{});
+}
+function readAll() { fetch('/notifications/read_all',{method:'POST'}).then(()=>{ document.getElementById('notifBadge').style.display='none'; document.getElementById('notifList').innerHTML='<div class="notif-empty">🔕 沒有新通知</div>'; }); }
+document.addEventListener('click', function(e) { const wrap = document.getElementById('notifBtn').closest('.notif-wrap'); if (!wrap.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open'); });
+fetch('/notifications/unread').then(r=>r.json()).then(data=>{ if(data.count>0){const b=document.getElementById('notifBadge');b.textContent=data.count>9?'9+':data.count;b.style.display='flex';}}).catch(()=>{});
+</script>
 </body>
 </html>

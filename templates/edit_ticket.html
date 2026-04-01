@@ -5,602 +5,267 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>編輯案件 - AWS 雲端內部案件管理系統</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-            background: linear-gradient(135deg, #eef4ff 0%, #f7f9fc 45%, #fdfdff 100%);
-            color: #1f2937;
-            min-height: 100vh;
-        }
-
-        .page-wrapper {
-            max-width: 1180px;
-            margin: 0 auto;
-            padding: 28px 20px 48px;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .page-title-wrap h1 {
-            font-size: 28px;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 6px;
-        }
-
-        .page-title-wrap p {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .top-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            border: none;
-            border-radius: 12px;
-            padding: 11px 18px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #fff;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
-        }
-
-        .btn-secondary {
-            background: #fff;
-            color: #334155;
-            border: 1px solid #dbe2ea;
-        }
-
-        .btn-secondary:hover {
-            background: #f8fafc;
-        }
-
-        .alert-wrap {
-            margin-bottom: 18px;
-        }
-
-        .alert {
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .alert-success {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
-        }
-
-        .alert-danger {
-            background: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-warning {
-            background: #fff7ed;
-            color: #c2410c;
-            border: 1px solid #fed7aa;
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 1.7fr 1fr;
-            gap: 22px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(226, 232, 240, 0.95);
-            border-radius: 22px;
-            padding: 24px;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-        }
-
-        .card + .card {
-            margin-top: 18px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 6px;
-        }
-
-        .card-desc {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-
-        .meta-strip {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
-        .meta-pill {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .meta-pill.gray {
-            background: #f8fafc;
-            color: #475569;
-            border-color: #e2e8f0;
-        }
-
-        .meta-pill.orange {
-            background: #fff7ed;
-            color: #c2410c;
-            border-color: #fed7aa;
-        }
-
-        .meta-pill.green {
-            background: #ecfdf5;
-            color: #047857;
-            border-color: #a7f3d0;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px 18px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group.full {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            font-size: 14px;
-            font-weight: 700;
-            color: #334155;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: -2px;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            border: 1px solid #dbe2ea;
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-size: 14px;
-            color: #0f172a;
-            background: #fff;
-            outline: none;
-            transition: all 0.18s ease;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        input[readonly],
-        textarea[readonly] {
-            background: #f8fafc;
-            color: #64748b;
-        }
-
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(to right, #e2e8f0, transparent);
-            margin: 22px 0;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .history-item {
-            position: relative;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 14px 14px 14px 16px;
-            background: #fff;
-        }
-
-        .history-item::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 14px;
-            bottom: 14px;
-            width: 4px;
-            border-radius: 999px;
-            background: linear-gradient(180deg, #3b82f6, #2563eb);
-        }
-
-        .history-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .history-head strong {
-            font-size: 14px;
-            color: #0f172a;
-        }
-
-        .history-time {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .history-content {
-            font-size: 14px;
-            color: #475569;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .readonly-box {
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 14px;
-            color: #475569;
-            font-size: 14px;
-            line-height: 1.7;
-        }
-
-        .bottom-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-
-        .badge-role {
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 800;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
-        }
-
-        .small-note {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 10px;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 980px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .page-wrapper {
-                padding: 20px 14px 36px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .card {
-                padding: 20px;
-                border-radius: 18px;
-            }
-
-            .page-title-wrap h1 {
-                font-size: 24px;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #eef4ff 0%, #f7f9fc 45%, #fdfdff 100%); color: #1f2937; min-height: 100vh; }
+        .global-topbar { background: linear-gradient(90deg, #2563eb, #4338ca); color: #fff; padding: 14px 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.18); display: flex; align-items: center; justify-content: space-between; }
+        .global-topbar-title { font-size: 20px; font-weight: 800; }
+        .page-wrapper { max-width: 1180px; margin: 0 auto; padding: 28px 20px 48px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .page-title-wrap h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .page-title-wrap p { color: #64748b; font-size: 14px; }
+        .top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; border-radius: 12px; padding: 11px 18px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s ease; }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; box-shadow: 0 8px 20px rgba(37,99,235,0.18); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(37,99,235,0.24); }
+        .btn-secondary { background: #fff; color: #334155; border: 1px solid #dbe2ea; }
+        .btn-secondary:hover { background: #f8fafc; }
+        .alert-wrap { margin-bottom: 18px; }
+        .alert { padding: 14px 16px; border-radius: 14px; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+        .alert-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .alert-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .alert-warning { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .layout { display: grid; grid-template-columns: 1.7fr 1fr; gap: 22px; }
+        .card { background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border: 1px solid rgba(226,232,240,0.95); border-radius: 22px; padding: 24px; box-shadow: 0 18px 40px rgba(15,23,42,0.08); }
+        .card + .card { margin-top: 18px; }
+        .card-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .card-desc { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+        .meta-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+        .meta-pill { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+        .meta-pill.gray { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+        .meta-pill.orange { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+        .meta-pill.green { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { font-size: 14px; font-weight: 700; color: #334155; }
+        .hint { font-size: 12px; color: #94a3b8; margin-top: -2px; }
+        input, select, textarea { width: 100%; border: 1px solid #dbe2ea; border-radius: 14px; padding: 12px 14px; font-size: 14px; color: #0f172a; background: #fff; outline: none; transition: all 0.18s ease; }
+        input:focus, select:focus, textarea:focus { border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96,165,250,0.18); }
+        textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+        input[readonly], textarea[readonly] { background: #f8fafc; color: #64748b; }
+        .section-divider { height: 1px; background: linear-gradient(to right, #e2e8f0, transparent); margin: 22px 0; }
+        .history-list { display: flex; flex-direction: column; gap: 14px; }
+        .history-item { position: relative; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 14px 14px 16px; background: #fff; }
+        .history-item::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 999px; background: linear-gradient(180deg, #3b82f6, #2563eb); }
+        .history-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+        .history-head strong { font-size: 14px; color: #0f172a; }
+        .history-time { font-size: 12px; color: #94a3b8; }
+        .history-content { font-size: 14px; color: #475569; line-height: 1.6; white-space: pre-wrap; }
+        .readonly-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 14px; color: #475569; font-size: 14px; line-height: 1.7; }
+        .bottom-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+        .badge-role { display: inline-block; font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: 999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .small-note { font-size: 12px; color: #94a3b8; margin-top: 10px; line-height: 1.6; }
+        /* 鈴鐺 */
+        .notif-btn { position: relative; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: #fff; }
+        .notif-btn:hover { background: rgba(255,255,255,0.25); }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; display: none; align-items: center; justify-content: center; padding: 0 3px; }
+        .notif-dropdown { position: absolute; top: 48px; right: 0; width: 320px; max-height: 400px; overflow-y: auto; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,0.15); border: 1px solid #e2e8f0; z-index: 9999; display: none; }
+        .notif-dropdown.open { display: block; }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+        .notif-header strong { font-size: 14px; color: #1e3a8a; }
+        .notif-read-all { font-size: 12px; color: #64748b; cursor: pointer; background: none; border: none; text-decoration: underline; }
+        .notif-item { display: block; padding: 10px 16px; border-bottom: 1px solid #f8fafc; color: inherit; transition: background 0.15s; border-left: 3px solid #2563eb; width: 100%; text-align: left; background: none; cursor: pointer; font-family: inherit; }
+        .notif-item:hover { background: #f8fbff; }
+        .notif-type-badge { font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 999px; margin-bottom: 3px; display: inline-block; }
+        .type-new_case { background: #dcfce7; color: #166534; }
+        .type-status_update { background: #dbeafe; color: #1d4ed8; }
+        .type-new_comment { background: #fef9c3; color: #854d0e; }
+        .type-refund_update { background: #e0f2fe; color: #075985; }
+        .notif-msg { font-size: 13px; color: #334155; font-weight: 600; margin: 2px 0; }
+        .notif-time { font-size: 11px; color: #94a3b8; }
+        .notif-empty { padding: 24px 16px; text-align: center; color: #94a3b8; font-size: 14px; }
+        .notif-footer { padding: 10px 16px; text-align: center; }
+        .notif-footer a { font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 700; }
+        .notif-wrap { position: relative; }
+        @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .page-wrapper { padding: 20px 14px 36px; } .form-grid { grid-template-columns: 1fr; } .card { padding: 20px; border-radius: 18px; } .page-title-wrap h1 { font-size: 24px; } }
     </style>
 </head>
 <body>
-    <div class="page-wrapper">
 
-        <div class="topbar">
-            <div class="page-title-wrap">
-                <h1>編輯案件</h1>
-                <p>調整案件內容、補充處理資訊，並保留完整歷程紀錄</p>
-            </div>
-
-            <div class="top-actions">
-                <a href="{{ url_for('ticket_detail', case_id=case['id']) }}" class="btn btn-secondary">返回案件明細</a>
-                <a href="{{ url_for('ticket_list') }}" class="btn btn-secondary">返回案件列表</a>
-            </div>
+<!-- 全域 topbar（含鈴鐺）-->
+<div class="global-topbar">
+    <div class="global-topbar-title">AWS 雲端內部案件管理系統</div>
+    <div class="notif-wrap">
+        <button class="notif-btn" onclick="toggleNotif()" id="notifBtn">🔔<span class="notif-badge" id="notifBadge"></span></button>
+        <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header"><strong>通知</strong><button class="notif-read-all" onclick="readAll()">全部已讀</button></div>
+            <div id="notifList"><div class="notif-empty">載入中...</div></div>
+            <div class="notif-footer"><a href="/notifications">查看全部通知</a></div>
         </div>
-
-        <div class="alert-wrap">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
-
-        <div class="layout">
-            <!-- 左側：表單 -->
-            <div>
-                <form method="POST" action="{{ url_for('edit_ticket', case_id=case['id']) }}">
-                    <div class="card">
-                        <div class="card-title">案件基本資料</div>
-                        <div class="card-desc">
-                            Submitter 可調整基本內容；Agent / Admin 可補充處理資訊與狀態更新
-                        </div>
-
-                        <div class="meta-strip">
-                            <div class="meta-pill">案件編號 #{{ case['id'] }}</div>
-                            <div class="meta-pill gray">建立時間：{{ case['created_at'] }}</div>
-                            <div class="meta-pill orange">目前狀態：{{ case['status'] }}</div>
-                            <div class="meta-pill green">優先級：{{ case['priority'] }}</div>
-                        </div>
-
-                        <div class="form-grid">
-                            <div class="form-group full">
-                                <label for="title">案件標題</label>
-                                <input type="text" id="title" name="title" maxlength="150" required
-                                       value="{{ case['title'] or '' }}">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="category">問題類別</label>
-                                <select id="category" name="category" required>
-                                    {% for item in categories %}
-                                        <option value="{{ item }}" {% if case['category'] == item %}selected{% endif %}>{{ item }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="priority">優先級</label>
-                                <select id="priority" name="priority" required
-                                    {% if current_user['role'] == 'submitter' %}disabled{% endif %}>
-                                    {% for item in priority_options %}
-                                        <option value="{{ item }}" {% if case['priority'] == item %}selected{% endif %}>{{ item }}</option>
-                                    {% endfor %}
-                                </select>
-                                {% if current_user['role'] == 'submitter' %}
-                                    <input type="hidden" name="priority" value="{{ case['priority'] }}">
-                                    <div class="hint">提報者不可調整優先級</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group">
-                                <label for="student_account">學員帳號</label>
-                                <input type="text" id="student_account" name="student_account"
-                                       pattern="^wes\d{6}$"
-                                       placeholder="例如：wes123456"
-                                       required
-                                       value="{{ case['student_account'] or '' }}">
-                                <div class="hint">格式：wes + 6位數字</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="student_name">學員姓名</label>
-                                <input type="text" id="student_name" name="student_name"
-                                       maxlength="50"
-                                       value="{{ case['student_name'] or '' }}">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="teacher_name">Tutor</label>
-                                <input type="text" id="teacher_name" name="teacher_name"
-                                       maxlength="100"
-                                       placeholder="請輸入老師英文名"
-                                       value="{{ case['teacher_name'] or '' }}">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="department">提報部門</label>
-                                <input type="text" id="department" name="department"
-                                       maxlength="50"
-                                       placeholder="例如：業務部"
-                                       value="{{ case['department'] or '' }}">
-                            </div>
-
-                            <div class="form-group full">
-                                <label for="description">案件內容說明</label>
-                                <textarea id="description" name="description" required
-                                          placeholder="請輸入案件說明、問題背景、學員反映內容等">{{ case['description'] or '' }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="section-divider"></div>
-
-                        <div class="card-title" style="font-size:16px;">處理資訊</div>
-                        <div class="card-desc">
-                            這一區主要提供 Agent / Admin 補充處理進度與內部紀錄
-                        </div>
-
-                        {% if current_user['role'] in ['agent', 'admin'] %}
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="status">案件狀態</label>
-                                    <select id="status" name="status" required>
-                                        {% for item in status_options %}
-                                            <option value="{{ item }}" {% if case['status'] == item %}selected{% endif %}>{{ item }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>目前登入身分</label>
-                                    <div class="readonly-box">
-                                        <span class="badge-role">{{ current_user['role'] | upper }}</span>
-                                        <div class="small-note">
-                                            Agent / Admin 可更新狀態、優先級與補充處理紀錄
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group full">
-                                    <label for="new_comment">新增處理紀錄</label>
-                                    <textarea id="new_comment" name="new_comment"
-                                              placeholder="例如：已聯繫教務確認、已查看課堂錄影、待主管確認補點處理方式..."></textarea>
-                                    <div class="hint">這裡建議寫「本次新增」內容，不要覆蓋舊紀錄</div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <input type="hidden" name="status" value="{{ case['status'] }}">
-                            <div class="readonly-box">
-                                你目前為提報者身分，可修改案件基本內容，但不可調整案件狀態與內部處理資訊。
-                            </div>
-                        {% endif %}
-
-                        <div class="bottom-actions">
-                            <a href="{{ url_for('ticket_detail', case_id=case['id']) }}" class="btn btn-secondary">取消</a>
-                            <button type="submit" class="btn btn-primary">儲存變更</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 右側：案件摘要 / 歷程 -->
-            <div>
-                <div class="card">
-                    <div class="card-title">案件摘要</div>
-                    <div class="card-desc">編輯前先快速確認目前資訊</div>
-
-                    <div class="history-list">
-                        <div class="history-item">
-                            <div class="history-head">
-                                <strong>提報者</strong>
-                            </div>
-                            <div class="history-content">
-                                {{ case['submitter_name'] or '-' }}（{{ case['submitter_department'] or '未填寫部門' }}）
-                            </div>
-                        </div>
-
-                        <div class="history-item">
-                            <div class="history-head">
-                                <strong>學員資訊</strong>
-                            </div>
-                            <div class="history-content">
-                                {{ case['student_account'] or '-' }}
-                                {% if case['student_name'] %} / {{ case['student_name'] }}{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="history-item">
-                            <div class="history-head">
-                                <strong>最後更新時間</strong>
-                            </div>
-                            <div class="history-content">
-                                {{ case['updated_at'] or case['created_at'] }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">處理歷程</div>
-                    <div class="card-desc">重點是多人接續處理，因此保留每次異動與補充紀錄</div>
-
-                    {% if status_logs and status_logs|length > 0 %}
-                        <div class="history-list">
-                            {% for log in status_logs %}
-                                <div class="history-item">
-                                    <div class="history-head">
-                                        <strong>
-                                            {% if log['old_status'] and log['new_status'] %}
-                                                狀態：{{ log['old_status'] }} → {{ log['new_status'] }}
-                                            {% elif log['new_status'] %}
-                                                狀態更新為：{{ log['new_status'] }}
-                                            {% else %}
-                                                歷程紀錄
-                                            {% endif %}
-                                        </strong>
-                                        <span class="history-time">{{ log['created_at'] }}</span>
-                                    </div>
-                                    <div class="history-content">
-                                        處理人：{{ log['changed_by_name'] or '系統' }}
-                                        {% if log['note'] %}
-                                            
-{{ log['note'] }}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="readonly-box">
-                            目前尚無歷程紀錄。
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
     </div>
+</div>
+
+<div class="page-wrapper">
+    <div class="topbar">
+        <div class="page-title-wrap">
+            <h1>編輯案件</h1>
+            <p>調整案件內容、補充處理資訊，並保留完整歷程紀錄</p>
+        </div>
+        <div class="top-actions">
+            <a href="{{ url_for('ticket_detail', case_id=case['id']) }}" class="btn btn-secondary">返回案件明細</a>
+            <a href="{{ url_for('ticket_list') }}" class="btn btn-secondary">返回案件列表</a>
+        </div>
+    </div>
+
+    <div class="alert-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="layout">
+        <div>
+            <form method="POST" action="{{ url_for('edit_ticket', case_id=case['id']) }}">
+                <div class="card">
+                    <div class="card-title">案件基本資料</div>
+                    <div class="card-desc">Submitter 可調整基本內容；Agent / Admin 可補充處理資訊與狀態更新</div>
+                    <div class="meta-strip">
+                        <div class="meta-pill">案件編號 #{{ case['id'] }}</div>
+                        <div class="meta-pill gray">建立時間：{{ case['created_at'] }}</div>
+                        <div class="meta-pill orange">目前狀態：{{ case['status'] }}</div>
+                        <div class="meta-pill green">優先級：{{ case['priority'] }}</div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="title">案件標題</label>
+                            <input type="text" id="title" name="title" maxlength="150" required value="{{ case['title'] or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">問題類別</label>
+                            <select id="category" name="category" required>
+                                {% for item in categories %}<option value="{{ item }}" {% if case['category'] == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">優先級</label>
+                            <select id="priority" name="priority" required {% if current_user['role'] == 'submitter' %}disabled{% endif %}>
+                                {% for item in priority_options %}<option value="{{ item }}" {% if case['priority'] == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                            </select>
+                            {% if current_user['role'] == 'submitter' %}<input type="hidden" name="priority" value="{{ case['priority'] }}"><div class="hint">提報者不可調整優先級</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="student_account">學員帳號</label>
+                            <input type="text" id="student_account" name="student_account" pattern="^wes\d{6}$" placeholder="例如：wes123456" required value="{{ case['student_account'] or '' }}">
+                            <div class="hint">格式：wes + 6位數字</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_name">學員姓名</label>
+                            <input type="text" id="student_name" name="student_name" maxlength="50" value="{{ case['student_name'] or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="teacher_name">Tutor</label>
+                            <input type="text" id="teacher_name" name="teacher_name" maxlength="100" placeholder="請輸入老師英文名" value="{{ case['teacher_name'] or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="department">提報部門</label>
+                            <input type="text" id="department" name="department" maxlength="50" placeholder="例如：業務部" value="{{ case['department'] or '' }}">
+                        </div>
+                        <div class="form-group full">
+                            <label for="description">案件內容說明</label>
+                            <textarea id="description" name="description" required placeholder="請輸入案件說明、問題背景、學員反映內容等">{{ case['description'] or '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <div class="card-title" style="font-size:16px;">處理資訊</div>
+                    <div class="card-desc">這一區主要提供 Agent / Admin 補充處理進度與內部紀錄</div>
+
+                    {% if current_user['role'] in ['agent', 'admin'] %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="status">案件狀態</label>
+                            <select id="status" name="status" required>
+                                {% for item in status_options %}<option value="{{ item }}" {% if case['status'] == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>目前登入身分</label>
+                            <div class="readonly-box">
+                                <span class="badge-role">{{ current_user['role'] | upper }}</span>
+                                <div class="small-note">Agent / Admin 可更新狀態、優先級與補充處理紀錄</div>
+                            </div>
+                        </div>
+                        <div class="form-group full">
+                            <label for="new_comment">新增處理紀錄</label>
+                            <textarea id="new_comment" name="new_comment" placeholder="例如：已聯繫教務確認、已查看課堂錄影、待主管確認補點處理方式..."></textarea>
+                            <div class="hint">這裡建議寫「本次新增」內容，不要覆蓋舊紀錄</div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <input type="hidden" name="status" value="{{ case['status'] }}">
+                    <div class="readonly-box">你目前為提報者身分，可修改案件基本內容，但不可調整案件狀態與內部處理資訊。</div>
+                    {% endif %}
+
+                    <div class="bottom-actions">
+                        <a href="{{ url_for('ticket_detail', case_id=case['id']) }}" class="btn btn-secondary">取消</a>
+                        <button type="submit" class="btn btn-primary">儲存變更</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div>
+            <div class="card">
+                <div class="card-title">案件摘要</div>
+                <div class="card-desc">編輯前先快速確認目前資訊</div>
+                <div class="history-list">
+                    <div class="history-item">
+                        <div class="history-head"><strong>提報者</strong></div>
+                        <div class="history-content">{{ case['submitter_name'] or '-' }}（{{ case['submitter_department'] or '未填寫部門' }}）</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-head"><strong>學員資訊</strong></div>
+                        <div class="history-content">{{ case['student_account'] or '-' }}{% if case['student_name'] %} / {{ case['student_name'] }}{% endif %}</div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-head"><strong>最後更新時間</strong></div>
+                        <div class="history-content">{{ case['updated_at'] or case['created_at'] }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">處理歷程</div>
+                <div class="card-desc">重點是多人接續處理，因此保留每次異動與補充紀錄</div>
+                {% if status_logs and status_logs|length > 0 %}
+                <div class="history-list">
+                    {% for log in status_logs %}
+                    <div class="history-item">
+                        <div class="history-head">
+                            <strong>{% if log['old_status'] and log['new_status'] %}狀態：{{ log['old_status'] }} → {{ log['new_status'] }}{% elif log['new_status'] %}狀態更新為：{{ log['new_status'] }}{% else %}歷程紀錄{% endif %}</strong>
+                            <span class="history-time">{{ log['created_at'] }}</span>
+                        </div>
+                        <div class="history-content">處理人：{{ log['changed_by_name'] or '系統' }}{% if log['note'] %}
+{{ log['note'] }}{% endif %}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="readonly-box">目前尚無歷程紀錄。</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const typeLabel = {'new_case':['新案件','type-new_case'],'status_update':['狀態更新','type-status_update'],'new_comment':['新留言','type-new_comment'],'refund_update':['歸還點數','type-refund_update']};
+function toggleNotif() { const dd = document.getElementById('notifDropdown'); dd.classList.toggle('open'); if (dd.classList.contains('open')) loadNotif(); }
+function loadNotif() {
+    fetch('/notifications/unread').then(r=>r.json()).then(data=>{
+        const badge = document.getElementById('notifBadge'); const list = document.getElementById('notifList');
+        if (data.count > 0) { badge.textContent = data.count > 9 ? '9+' : data.count; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }
+        if (!data.notifications.length) { list.innerHTML = '<div class="notif-empty">🔕 沒有新通知</div>'; return; }
+        list.innerHTML = data.notifications.map(n => { const [label, cls] = typeLabel[n.event_type] || ['通知','type-status_update']; return `<form method="POST" action="/notifications/${n.id}/read" style="margin:0;"><button type="submit" class="notif-item"><span class="notif-type-badge ${cls}">${label}</span><div class="notif-msg">${n.message}</div><div class="notif-time">${n.created_at}${n.case_title ? ' · ' + n.case_title : ''}</div></button></form>`; }).join('');
+    }).catch(()=>{});
+}
+function readAll() { fetch('/notifications/read_all',{method:'POST'}).then(()=>{ document.getElementById('notifBadge').style.display='none'; document.getElementById('notifList').innerHTML='<div class="notif-empty">🔕 沒有新通知</div>'; }); }
+document.addEventListener('click', function(e) { const wrap = document.getElementById('notifBtn').closest('.notif-wrap'); if (!wrap.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open'); });
+fetch('/notifications/unread').then(r=>r.json()).then(data=>{ if(data.count>0){const b=document.getElementById('notifBadge');b.textContent=data.count>9?'9+':data.count;b.style.display='flex';}}).catch(()=>{});
+</script>
 </body>
 </html>

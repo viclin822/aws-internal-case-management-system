@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import mysql.connector
 import os
 import boto3
@@ -69,6 +69,57 @@ def get_current_user():
     conn.close()
     return user
 
+# ── 通知輔助函數 ──────────────────────────────────────────
+
+def create_notification(user_id, case_id, message, event_type):
+    """建立單一通知"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO notifications (user_id, case_id, message, event_type, is_read, created_at) VALUES (%s,%s,%s,%s,0,%s)",
+            (user_id, case_id, message, event_type, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception:
+        pass  # 通知失敗不影響主流程
+
+def notify_agents(case_id, message, event_type):
+    """通知所有 Agent 與 Admin"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users WHERE role IN ('agent', 'admin')")
+        agents = cursor.fetchall()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for (agent_id,) in agents:
+            cursor.execute(
+                "INSERT INTO notifications (user_id, case_id, message, event_type, is_read, created_at) VALUES (%s,%s,%s,%s,0,%s)",
+                (agent_id, case_id, message, event_type, now_str)
+            )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception:
+        pass
+
+def get_unread_count(user_id):
+    """取得未讀通知數量"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM notifications WHERE user_id = %s AND is_read = 0", (user_id,))
+        count = cursor.fetchone()[0]
+        cursor.close()
+        conn.close()
+        return count
+    except Exception:
+        return 0
+
+# ── 日期工具 ──────────────────────────────────────────────
+
 def get_date_range(period):
     today = date.today()
     year = today.year
@@ -118,6 +169,8 @@ PERIOD_OPTIONS = [
     ("this_year", "今年"),
 ]
 
+# ── 認證 Routes ───────────────────────────────────────────
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -143,6 +196,8 @@ def logout():
     session.clear()
     flash("已登出系統", "success")
     return redirect(url_for("login"))
+
+# ── 首頁 ──────────────────────────────────────────────────
 
 @app.route("/")
 @login_required
@@ -170,8 +225,86 @@ def index():
         recent_cases = fetchall_as_dict(cursor)
     cursor.close()
     conn.close()
+    unread_count = get_unread_count(current_user["id"])
     return render_template("index.html", current_user=current_user, total_cases=total_cases,
-        pending_cases=pending_cases, closed_cases=closed_cases, recent_cases=recent_cases)
+        pending_cases=pending_cases, closed_cases=closed_cases, recent_cases=recent_cases,
+        unread_count=unread_count)
+
+# ── 通知 Routes ───────────────────────────────────────────
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    current_user = get_current_user()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT n.*, c.title as case_title
+        FROM notifications n
+        LEFT JOIN cases c ON n.case_id = c.id
+        WHERE n.user_id = %s
+        ORDER BY n.created_at DESC
+        LIMIT 50
+    """, (current_user["id"],))
+    notifs = fetchall_as_dict(cursor)
+    cursor.close()
+    conn.close()
+    unread_count = get_unread_count(current_user["id"])
+    return render_template("notifications.html", current_user=current_user,
+                           notifications=notifs, unread_count=unread_count)
+
+@app.route("/notifications/unread")
+@login_required
+def notifications_unread():
+    current_user = get_current_user()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT n.id, n.message, n.event_type, n.case_id, n.created_at, c.title as case_title
+        FROM notifications n
+        LEFT JOIN cases c ON n.case_id = c.id
+        WHERE n.user_id = %s AND n.is_read = 0
+        ORDER BY n.created_at DESC
+        LIMIT 10
+    """, (current_user["id"],))
+    notifs = fetchall_as_dict(cursor)
+    cursor.close()
+    conn.close()
+    for n in notifs:
+        if n.get("created_at"):
+            n["created_at"] = n["created_at"].strftime("%m/%d %H:%M")
+    return jsonify({"count": len(notifs), "notifications": notifs})
+
+@app.route("/notifications/read_all", methods=["POST"])
+@login_required
+def notifications_read_all():
+    current_user = get_current_user()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE notifications SET is_read = 1 WHERE user_id = %s", (current_user["id"],))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(request.referrer or url_for("notifications"))
+
+@app.route("/notifications/<int:notif_id>/read", methods=["POST"])
+@login_required
+def notification_read(notif_id):
+    current_user = get_current_user()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM notifications WHERE id = %s AND user_id = %s", (notif_id, current_user["id"]))
+    notif = fetchone_as_dict(cursor)
+    if notif:
+        cursor.execute("UPDATE notifications SET is_read = 1 WHERE id = %s", (notif_id,))
+        conn.commit()
+    cursor.close()
+    conn.close()
+    if notif:
+        return redirect(url_for("ticket_detail", case_id=notif["case_id"]))
+    return redirect(url_for("notifications"))
+
+# ── 案件 Routes ───────────────────────────────────────────
 
 @app.route("/tickets")
 @login_required
@@ -185,7 +318,6 @@ def ticket_list():
     period = request.args.get("period", "").strip()
     start_date, end_date = get_date_range(period)
 
-    # 案件列表查詢（套用日期篩選）
     base_query = "SELECT c.*, u.username AS submitter_name FROM cases c LEFT JOIN users u ON c.submitter_id = u.id WHERE 1=1"
     params = []
     if current_user["role"] == "submitter":
@@ -208,7 +340,6 @@ def ticket_list():
     cursor.execute(base_query, params)
     cases = fetchall_as_dict(cursor)
 
-    # 統計問題類別占比（同樣套用日期篩選）
     stat_query = "SELECT category, COUNT(*) as cnt FROM cases WHERE 1=1"
     stat_params = []
     if current_user["role"] == "submitter":
@@ -223,10 +354,12 @@ def ticket_list():
 
     cursor.close()
     conn.close()
+    unread_count = get_unread_count(current_user["id"])
     return render_template("ticket_list.html", current_user=current_user, cases=cases,
         categories=CATEGORIES, status_options=STATUS_OPTIONS, period_options=PERIOD_OPTIONS,
         selected_status=status_filter, selected_category=category_filter,
-        keyword=keyword, category_stats=category_stats, selected_period=period)
+        keyword=keyword, category_stats=category_stats, selected_period=period,
+        unread_count=unread_count)
 
 @app.route("/tickets/create", methods=["GET", "POST"])
 @login_required
@@ -265,6 +398,10 @@ def create_ticket():
             cursor.execute("INSERT INTO case_status_logs (case_id, old_status, new_status, changed_by, note, created_at) VALUES (%s,%s,%s,%s,%s,%s)",
                 (case_id, None, status, current_user["id"], "案件建立", now_str))
             conn.commit()
+
+            # 通知所有 Agent 有新案件
+            notify_agents(case_id, f"📋 新案件：{title}", "new_case")
+
             files = request.files.getlist("attachments")
             for file in files:
                 if file and file.filename and allowed_file(file.filename):
@@ -313,8 +450,10 @@ def ticket_detail(case_id):
     cursor.execute("SELECT l.*, u.username AS changed_by_name FROM case_status_logs l LEFT JOIN users u ON l.changed_by = u.id WHERE l.case_id = %s ORDER BY l.created_at DESC", (case_id,))
     status_logs = fetchall_as_dict(cursor)
     cursor.close(); conn.close()
+    unread_count = get_unread_count(current_user["id"])
     return render_template("ticket_detail.html", current_user=current_user, case=case,
-        attachments=attachments, comments=comments, status_logs=status_logs, status_options=STATUS_OPTIONS)
+        attachments=attachments, comments=comments, status_logs=status_logs,
+        status_options=STATUS_OPTIONS, unread_count=unread_count)
 
 @app.route("/tickets/<int:case_id>/upload", methods=["POST"])
 @login_required
@@ -421,7 +560,7 @@ def toggle_refund(case_id):
         return redirect(url_for("ticket_detail", case_id=case_id))
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT refund_points FROM cases WHERE id = %s", (case_id,))
+    cursor.execute("SELECT refund_points, submitter_id FROM cases WHERE id = %s", (case_id,))
     case = fetchone_as_dict(cursor)
     if not case:
         cursor.close(); conn.close()
@@ -429,12 +568,20 @@ def toggle_refund(case_id):
         return redirect(url_for("ticket_list"))
     new_value = 0 if case["refund_points"] else 1
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    label = "已標記歸還" if new_value else "已取消歸還"
     try:
         cursor.execute("UPDATE cases SET refund_points=%s, updated_at=%s WHERE id=%s", (new_value, now_str, case_id))
         cursor.execute("INSERT INTO case_status_logs (case_id, old_status, new_status, changed_by, note, created_at) VALUES (%s,%s,%s,%s,%s,%s)",
-            (case_id, None, None, current_user["id"], f"歸還點數{'已標記' if new_value else '已取消'}", now_str))
+            (case_id, None, None, current_user["id"], f"歸還點數{label}", now_str))
         conn.commit()
-        flash(f"歸還點數{'已標記' if new_value else '已取消'}", "success")
+
+        # 通知提交者歸還點數狀態更新
+        create_notification(
+            case["submitter_id"], case_id,
+            f"🔄 你的案件歸還點數狀態：{label}",
+            "refund_update"
+        )
+        flash(f"歸還點數{label}", "success")
     except Exception as e:
         conn.rollback()
         flash(f"操作失敗：{str(e)}", "danger")
@@ -455,7 +602,7 @@ def update_status(case_id):
         return redirect(url_for("ticket_detail", case_id=case_id))
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT status FROM cases WHERE id = %s", (case_id,))
+    cursor.execute("SELECT status, submitter_id FROM cases WHERE id = %s", (case_id,))
     case = fetchone_as_dict(cursor)
     if not case:
         cursor.close(); conn.close()
@@ -471,6 +618,13 @@ def update_status(case_id):
         cursor.execute("INSERT INTO case_status_logs (case_id, old_status, new_status, changed_by, note, created_at) VALUES (%s,%s,%s,%s,%s,%s)",
             (case_id, old_status, new_status, current_user["id"], f"狀態由「{old_status}」更新為「{new_status}」", now_str))
         conn.commit()
+
+        # 通知提交者狀態已更新
+        create_notification(
+            case["submitter_id"], case_id,
+            f"📌 你的案件狀態已更新為「{new_status}」",
+            "status_update"
+        )
         flash(f"狀態已更新為「{new_status}」", "success")
     except Exception as e:
         conn.rollback()
@@ -538,6 +692,12 @@ def edit_ticket(case_id):
                         (case_id, old_status, status, current_user["id"],
                          new_comment if new_comment else f"狀態由「{old_status}」更新為「{status}」",
                          datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                    # 通知提交者
+                    create_notification(
+                        case["submitter_id"], case_id,
+                        f"📌 你的案件狀態已更新為「{status}」",
+                        "status_update"
+                    )
                 elif current_user["role"] in ["agent","admin"] and new_comment:
                     cursor.execute("INSERT INTO case_status_logs (case_id, old_status, new_status, changed_by, note, created_at) VALUES (%s,%s,%s,%s,%s,%s)",
                         (case_id, status, status, current_user["id"], new_comment,
@@ -552,9 +712,10 @@ def edit_ticket(case_id):
     cursor.execute("SELECT l.*, u.username AS changed_by_name FROM case_status_logs l LEFT JOIN users u ON l.changed_by = u.id WHERE l.case_id = %s ORDER BY l.created_at DESC", (case_id,))
     status_logs = fetchall_as_dict(cursor)
     cursor.close(); conn.close()
+    unread_count = get_unread_count(current_user["id"])
     return render_template("edit_ticket.html", case=case, current_user=current_user,
         categories=CATEGORIES, priority_options=PRIORITY_OPTIONS,
-        status_options=STATUS_OPTIONS, status_logs=status_logs)
+        status_options=STATUS_OPTIONS, status_logs=status_logs, unread_count=unread_count)
 
 @app.route("/tickets/<int:case_id>/comments/add", methods=["POST"])
 @login_required
@@ -584,6 +745,19 @@ def add_comment(case_id):
         cursor.execute("INSERT INTO case_comments (case_id, comment, comment_type, created_by, created_at) VALUES (%s,%s,%s,%s,%s)",
             (case_id, comment, comment_type, current_user["id"], now_str))
         conn.commit()
+
+        # 通知邏輯
+        if comment_type == "external":
+            # 外部留言：通知提交者（若留言者不是提交者本人）
+            if case["submitter_id"] != current_user["id"]:
+                create_notification(
+                    case["submitter_id"], case_id,
+                    f"💬 你的案件「{case['title']}」有新留言",
+                    "new_comment"
+                )
+        # 所有留言都通知 Agent（排除留言者本人）
+        notify_agents_except(case_id, f"💬 案件「{case['title']}」有新留言", "new_comment", current_user["id"])
+
         flash("備註新增成功", "success")
     except Exception as e:
         conn.rollback()
@@ -626,8 +800,32 @@ def admin_stats():
     agent_stats = fetchall_as_dict(cursor)
     cursor.close()
     conn.close()
+    unread_count = get_unread_count(current_user["id"])
     return render_template("admin_stats.html", current_user=current_user,
-        agent_stats=agent_stats, period_options=PERIOD_OPTIONS, selected_period=period)
+        agent_stats=agent_stats, period_options=PERIOD_OPTIONS, selected_period=period,
+        unread_count=unread_count)
+
+# ── 額外輔助：通知 Agent 但排除自己 ──────────────────────
+
+def notify_agents_except(case_id, message, event_type, exclude_user_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users WHERE role IN ('agent', 'admin') AND id != %s", (exclude_user_id,))
+        agents = cursor.fetchall()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for (agent_id,) in agents:
+            cursor.execute(
+                "INSERT INTO notifications (user_id, case_id, message, event_type, is_read, created_at) VALUES (%s,%s,%s,%s,0,%s)",
+                (agent_id, case_id, message, event_type, now_str)
+            )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception:
+        pass
+
+# ── 錯誤處理 ──────────────────────────────────────────────
 
 @app.errorhandler(404)
 def page_not_found(e):
