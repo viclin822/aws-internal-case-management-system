@@ -1,0 +1,16 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+*.db
+*.sqlite
+docs/
+*.md
+seed_data.py
+seed_users.py
+init_db.py
