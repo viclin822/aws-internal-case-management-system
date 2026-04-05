@@ -132,16 +132,5 @@ new Chart(document.getElementById('kpiChart').getContext('2d'), {
 });
 </script>
 {% endif %}
-<div class="topbar" style="display:flex;align-items:center;justify-content:space-between;">
-    <h1>AWS 雲端內部案件管理系統</h1>
-    <div style="position:relative;" id="nw">
-        <button onclick="toggleNotif()" id="notifBtn" style="position:relative;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;color:#fff;">🔔<span id="notifBadge" style="position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:800;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 4px;"></span></button>
-        <div id="notifDropdown" style="display:none;position:absolute;top:52px;right:0;width:320px;max-height:400px;overflow-y:auto;background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(15,23,42,0.15);border:1px solid #e2e8f0;z-index:9999;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #f1f5f9;"><strong style="font-size:14px;color:#1e3a8a;">通知</strong><button onclick="readAll()" style="font-size:12px;color:#64748b;background:none;border:none;text-decoration:underline;cursor:pointer;">全部已讀</button></div>
-            <div id="notifList" style="padding:16px;text-align:center;color:#94a3b8;font-size:14px;">載入中...</div>
-            <div style="padding:10px 16px;text-align:center;"><a href="/notifications" style="font-size:13px;color:#2563eb;text-decoration:none;font-weight:700;">查看全部通知</a></div>
-        </div>
-    </div>
-</div>
 </body>
 </html>
