@@ -3,3 +3,4 @@ mysql-connector-python
 boto3
 python-dotenv
 werkzeug
+gunicorn

@@ -7,12 +7,27 @@ from functools import wraps
 from datetime import datetime, date
 from werkzeug.security import check_password_hash
 from dotenv import load_dotenv
+import logging
+from logging.handlers import RotatingFileHandler
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "your-secret-key")
 
+# Logging 設定
+if not app.debug:
+    handler = RotatingFileHandler(
+        'logs/app.log', maxBytes=1024*1024*10, backupCount=3
+    )
+    handler.setLevel(logging.WARNING)
+    formatter = logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    )
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.WARNING)
+    
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 S3_REGION = os.getenv("S3_REGION")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'pdf', 'doc', 'docx'}
