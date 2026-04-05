@@ -351,7 +351,7 @@ aws-internal-case-management-system/
 - 完成案件建立、追蹤、留言、通知、歷程記錄等完整流程
 - 整合 AWS EC2、RDS、S3、CloudWatch、SNS
 - 使用 Nginx + Gunicorn + Flask 完成部署
-- 導入 CloudWatch 與 SNS 建立基本監控與告警機制
+- 導入 CloudWatch 與 SNS 建立監控儀表板與自動化告警機制
 - 具備從需求分析、資料庫設計、後端開發、部署到維運的完整實作流程
 
 ---
