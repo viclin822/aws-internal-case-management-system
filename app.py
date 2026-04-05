@@ -845,6 +845,21 @@ def notify_agents_except(case_id, message, event_type, exclude_user_id):
 
 # ── 錯誤處理 ──────────────────────────────────────────────
 
+# ── Health Check ──────────────────────────────────────────
+
+@app.route("/health")
+def health_check():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return jsonify({"status": "ok", "db": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "db": str(e)}), 500
+    
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
