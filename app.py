@@ -849,6 +849,7 @@ def notify_agents_except(case_id, message, event_type, exclude_user_id):
 
 @app.route("/health")
 def health_check():
+    result = {"status": "ok", "db": "unknown", "s3": "unknown"}
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -856,9 +857,19 @@ def health_check():
         cursor.fetchone()
         cursor.close()
         conn.close()
-        return jsonify({"status": "ok", "db": "connected"}), 200
+        result["db"] = "connected"
     except Exception as e:
-        return jsonify({"status": "error", "db": str(e)}), 500
+        result["status"] = "error"
+        result["db"] = str(e)
+    try:
+        s3 = boto3.client("s3", region_name=S3_REGION)
+        s3.head_bucket(Bucket=S3_BUCKET)
+        result["s3"] = "connected"
+    except Exception as e:
+        result["status"] = "error"
+        result["s3"] = str(e)
+    status_code = 200 if result["status"] == "ok" else 500
+    return jsonify(result), status_code
     
 @app.errorhandler(404)
 def page_not_found(e):
