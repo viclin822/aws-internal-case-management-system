@@ -46,10 +46,10 @@ def upload_file_to_s3(file, case_id):
 db_pool = mysql.connector.pooling.MySQLConnectionPool(
     pool_name="ticket_pool",
     pool_size=5,
-    host=os.getenv("DB_HOST", "localhost"),
-    user=os.getenv("DB_USER", "ticket_user"),
-    password=os.getenv("DB_PASSWORD", "Ticket@2026"),
-    database=os.getenv("DB_NAME", "aws_ticket_system"),
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME"),
     charset="utf8mb4"
 )
 
