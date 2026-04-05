@@ -72,9 +72,9 @@
     ▼
 ┌─────────────────────────────── AWS VPC ───────────────────────────────┐
 │  ┌─────────────────── Public Subnet ──────────────────────────────┐   │
-│  │  ┌─────────────── Amazon EC2（t3.micro）──────────────────┐    │   │
-│  │  │  Nginx（反向代理）port 80 → Flask port 5000            │    │   │
-│  │  │  Flask Web Application（app.py）                        │    │   │
+│  │  ┌─────────────── Amazon EC2（t2.micro）──────────────────┐    │   │
+│  │  │  Nginx（反向代理）port 80 → Gunicorn port 5000         │    │   │
+│  │  │  Gunicorn → Flask Web Application（app.py）            │    │   │
 │  │  │  IAM Role ／ systemd（aws-ticket.service）             │    │   │
 │  │  └────────────────────────────────────────────────────────┘    │   │
 │  └────────────────────────────────────────────────────────────────┘   │
@@ -100,9 +100,11 @@
 | 類別 | 技術 |
 |------|------|
 | 後端 | Python Flask |
+| WSGI 伺服器 | Gunicorn |
+| 容器化 | Docker / Docker Compose |
 | 資料庫 | AWS RDS MySQL 8.4.7 |
 | 檔案儲存 | AWS S3（Presigned URL） |
-| 伺服器 | AWS EC2 t3.micro（Ubuntu 24.04） |
+| 伺服器 | AWS EC2 t2.micro（Ubuntu 24.04） |
 | 反向代理 | Nginx |
 | 服務管理 | systemd |
 | 權限控管 | AWS IAM Role / Policy |
@@ -139,7 +141,7 @@
 | 項目 | 說明 |
 |------|------|
 | 雲端平台 | AWS ap-southeast-2（雪梨） |
-| EC2 | t3.micro / Ubuntu 24.04 / Elastic IP |
+| EC2 | t2.micro / Ubuntu 24.04 / Elastic IP |
 | 對外存取 | http://13.54.242.189 |
 | 資料庫 | RDS MySQL（Private Subnet，port 3306） |
 | 備份 | RDS 自動備份啟用 ／ KMS 加密 |
@@ -168,6 +170,16 @@ cp .env.example .env
 python app.py
 ```
 
+### Docker 啟動（選用）
+
+```bash
+# 建立並啟動容器
+docker compose up --build
+
+# 背景執行
+docker compose up --build -d
+```
+
 ---
 
 ## 專案結構
@@ -176,16 +188,20 @@ python app.py
 aws-internal-case-management-system/
 ├── app.py                  # 主應用程式
 ├── requirements.txt        # 依賴套件
+├── Dockerfile              # Docker 映像設定
+├── docker-compose.yml      # Docker Compose 設定
 ├── .env.example            # 環境變數範本
+├── .gitignore              # Git 忽略清單
+├── logs/                   # 應用程式日誌（自動產生）
 ├── templates/              # Jinja2 HTML 模板
 │   ├── base.html
 │   ├── index.html
-│   ├── tickets.html
+│   ├── ticket_list.html
 │   ├── ticket_detail.html
 │   ├── create_ticket.html
 │   ├── edit_ticket.html
+│   ├── notifications.html
 │   └── admin_stats.html
-├── static/                 # 靜態資源
 └── docs/                   # 專案文件
     ├── architecture.html   # 系統架構圖
     └── cloudwatch-dashboard.png
