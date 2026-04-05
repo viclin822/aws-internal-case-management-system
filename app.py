@@ -27,7 +27,7 @@ if not app.debug:
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.WARNING)
-    
+
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 S3_REGION = os.getenv("S3_REGION")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'pdf', 'doc', 'docx'}
@@ -43,15 +43,18 @@ def upload_file_to_s3(file, case_id):
     file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{unique_filename}"
     return unique_filename, file_url, file.filename, ext
 
+db_pool = mysql.connector.pooling.MySQLConnectionPool(
+    pool_name="ticket_pool",
+    pool_size=5,
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "ticket_user"),
+    password=os.getenv("DB_PASSWORD", "Ticket@2026"),
+    database=os.getenv("DB_NAME", "aws_ticket_system"),
+    charset="utf8mb4"
+)
+
 def get_db_connection():
-    conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "ticket_user"),
-        password=os.getenv("DB_PASSWORD", "Ticket@2026"),
-        database=os.getenv("DB_NAME", "aws_ticket_system"),
-        charset="utf8mb4"
-    )
-    return conn
+    return db_pool.get_connection()
 
 def fetchone_as_dict(cursor):
     row = cursor.fetchone()
