@@ -162,7 +162,11 @@
         if (HIGH_PRIORITY.includes(category)) {
             prioritySelect.value = '高';
             hint.className = 'priority-hint high';
+            {% if current_user.role in ['agent', 'admin'] %}
             hint.textContent = '🔴 此類別自動設為高優先級，請盡速處理';
+            {% else %}
+            hint.textContent = '🔴 此類別將自動設為高優先級，客服將優先處理';
+            {% endif %}
         } else if (MID_PRIORITY.includes(category)) {
             prioritySelect.value = '中';
             hint.className = 'priority-hint mid';
