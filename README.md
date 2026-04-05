@@ -117,9 +117,15 @@
 ┌─────────────────────────────── AWS VPC ───────────────────────────────┐
 │  ┌─────────────────── Public Subnet ──────────────────────────────┐   │
 │  │  ┌─────────────── Amazon EC2（t2.micro）──────────────────┐    │   │
-│  │  │  Nginx（反向代理）port 80 → Gunicorn port 5000         │    │   │
-│  │  │  Gunicorn → Flask Web Application（app.py）            │    │   │
-│  │  │  IAM Role ／ systemd（aws-ticket.service）             │    │   │
+│  │  │  Nginx（反向代理）port 80                             │    │   │
+│  │  │        │                                               │    │   │
+│  │  │        ▼                                               │    │   │
+│  │  │  Gunicorn（WSGI Server）port 5000                     │    │   │
+│  │  │        │                                               │    │   │
+│  │  │        ▼                                               │    │   │
+│  │  │  Flask Web Application（app.py）                      │    │   │
+│  │  │                                                        │    │   │
+│  │  │  IAM Role ／ systemd（aws-ticket.service）            │    │   │
 │  │  └────────────────────────────────────────────────────────┘    │   │
 │  └────────────────────────────────────────────────────────────────┘   │
 │  ┌─────────────────── Private Subnet ─────────────────────────────┐   │
@@ -129,7 +135,7 @@
          │ Presigned URL                    │ 指標送出
          ▼                                  ▼
    Amazon S3                        Amazon CloudWatch
-   vic-ticket-attachments           EC2-Monitor 儀表板
+   vic-ticket-attachments           AWS-CaseSystem-Monitor 儀表板
    （VPC 外，全球服務）              CPU ／ 狀態檢查警報
                                           │ 警報觸發
                                           ▼
@@ -234,7 +240,7 @@
 
 ## CloudWatch 監控與維運
 
-使用 AWS CloudWatch 建立 EC2 監控儀表板，  
+使用 AWS CloudWatch 建立 **AWS-CaseSystem-Monitor** 儀表板，  
 集中追蹤主機效能與資源使用狀況，提升服務可觀測性與基本維運能力。
 
 ### 儀表板監控項目
