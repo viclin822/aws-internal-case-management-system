@@ -2,71 +2,115 @@
 
 **AWS Internal Case Management System**
 
-> 結合第一線客服工作場景，獨立設計並實作的雲端內部案件管理系統，  
-> 涵蓋雲端架構設計、資料庫設計、後端開發、AWS 多服務整合與監控全流程。
+> 這是一套針對內部案件協作流程設計的雲端管理系統，  
+> 主要服務對象為業務、客服與主管，解決原本以 Google 表單與表格分散追蹤案件時，  
+> 在權限分流、處理進度追蹤、留言協作、附件整合與歷程管理上的不便。
 
 ---
 
-## 專案背景
+## 專案簡介
 
-本人具備近 5 年平台客服與營運支援經驗，現轉職 IT 領域，  
-就讀國立臺北商業大學資訊管理系（預計 2026 年 7 月畢業），  
-並同步參與緯育 TibaMe AWS 雲端工程師培訓計畫。
+本專案為一套以真實工作場景為基礎發想的內部案件管理系統，  
+聚焦於「案件提報、案件處理、狀態追蹤、站內通知、權限控管、統計報表」等核心需求。
 
-此專案並非課程指定作品（TibaMe 個人專題預計 2026/05 後啟動），  
-而是基於第一線客服工作經驗，獨立發起並完整實作的雲端系統。
+系統依不同使用角色區分權限範圍：
 
-長期接觸案件處理流程，深刻理解現有工具在追蹤、協作與歷程記錄上的痛點，  
-因此自行設計並建構此內部案件管理系統，整合多項 AWS 服務，完整實作從開發到部署維運的全流程。
+- **Submitter（業務）**：提交案件、查看自己案件、追蹤進度
+- **Agent（客服）**：查看全部案件、更新狀態、留言協作、處理案件
+- **Admin（主管）**：完整權限、KPI 報表、管理使用者
+
+本專案整合 AWS EC2、RDS、S3、CloudWatch、SNS 等服務，  
+實作從需求發想到資料庫設計、功能開發、雲端部署與基礎維運監控的完整流程。
+
+---
+
+## 專案動機
+
+目前第一線客服與業務回報流程，常透過 Google 表單提交、表格追蹤進度。  
+雖然能完成基本紀錄，但在角色權限分流、案件狀態管理、留言協作、附件整合與歷程追蹤上仍有整合空間。
+
+因此，我以真實工作場景為基礎，獨立設計並實作此內部案件管理系統，  
+希望將原本分散的提報、處理與追蹤流程整合為單一平台。
+
+---
+
+## 專案定位
+
+本專案並非課程指定作業，而是在 AWS 雲端工程師培訓正式個人專題啟動前，  
+為驗證自己在系統開發與維運方向的能力，主動完成的實作作品。
+
+專案重點不只是完成功能頁面，而是同時納入：
+
+- 角色權限控管（RBAC）
+- 案件流程設計
+- 附件儲存整合
+- 狀態歷程記錄
+- 站內通知機制
+- AWS 雲端部署
+- CloudWatch 監控與 SNS 告警
 
 ---
 
 ## 系統功能
 
 ### 角色權限控管（RBAC）
+
 | 角色 | 說明 |
 |------|------|
 | Submitter（業務） | 提交案件、查看自己的案件、新增外部留言 |
 | Agent（客服） | 處理所有案件、新增內外部留言、更新狀態 |
-| Admin（主管） | 全部權限 ＋ KPI 報表 ＋ 管理使用者 |
+| Admin（主管） | 全部權限 + KPI 報表 + 管理使用者 |
 
 ### 案件管理
+
 - 工單建立與追蹤
 - 狀態管理（待處理 / 處理中 / 待追蹤 / 已結案）
-- 問題分類 → 自動優先度指派
+- 問題分類與優先級設計
 - 歸還點數狀態標記
-- 內部留言（僅 Agent / Admin 可見）
-- 外部留言（Submitter 可見）
 - 附件上傳（整合 S3 Presigned URL）
+- 留言協作（外部留言 / 內部備註）
+- 狀態歷程紀錄
 
 ### 管理功能
-- Admin KPI 報表（各客服案件數量、長條圖）
-- 問題分類圓餅圖（含日期篩選）
+
+- Admin KPI 報表（各客服已結案件數量統計）
+- 問題分類圓餅圖（含日期區間篩選）
 - 使用者管理
 
 ### 站內通知系統
-- 導覽列鈴鐺圖示，即時顯示未讀通知數量紅點
-- 觸發條件：
-  - 新案件建立 → 通知所有 Agent / Admin
-  - 案件狀態更新 → 通知該案件的 Submitter
-  - 新增留言 → 通知相關人員（外部留言通知 Submitter，所有留言通知 Agent）
-  - 歸還點數狀態更新 → 通知 Submitter
+
+- 導覽列鈴鐺圖示，即時顯示未讀通知紅點
+- 新案件建立 → 通知 Agent / Admin
+- 案件狀態更新 → 通知 Submitter
+- 新增留言 → 通知相關人員
+- 歸還點數狀態更新 → 通知 Submitter
 - 通知分類標籤（新案件 / 狀態更新 / 新留言 / 歸還點數）
-- 點擊通知直接跳轉對應案件
+- 點擊通知可跳轉對應案件
 - 一鍵全部已讀
-- 通知中心頁面（查看全部歷史通知）
+- 通知中心頁面（查看完整歷史通知）
 
 ---
 
 ## 系統架構
 
-![架構圖](docs/architecture.png)
+![系統架構圖](docs/architecture.png)
 
-詳細架構請參考：[docs/architecture.html](docs/architecture.html)
+### 架構說明
+
+系統採用 AWS 雲端部署，主要架構如下：
+
+- 使用者透過瀏覽器以 HTTP 存取系統
+- 請求先進入 EC2 上的 **Nginx**
+- Nginx 反向代理至 **Gunicorn**
+- Gunicorn 執行 **Flask Web Application**
+- 應用程式連接 **AWS RDS MySQL**
+- 附件檔案透過 **AWS S3 Presigned URL** 上傳
+- 主機與應用監控透過 **CloudWatch**
+- 異常告警透過 **Amazon SNS** 發送通知
 
 ### AWS 服務架構
 
-```
+```text
 使用者（瀏覽器）
     │ HTTP port 80
     ▼
@@ -102,7 +146,7 @@
 | 後端 | Python Flask |
 | WSGI 伺服器 | Gunicorn |
 | 容器化 | Docker / Docker Compose |
-| 資料庫 | AWS RDS MySQL 8.4.7 |
+| 資料庫 | AWS RDS MySQL 8.4 |
 | 檔案儲存 | AWS S3（Presigned URL） |
 | 伺服器 | AWS EC2 t2.micro（Ubuntu 24.04） |
 | 反向代理 | Nginx |
@@ -114,25 +158,100 @@
 
 ---
 
+## 系統畫面展示
+
+### Submitter（業務）
+
+#### 1. 登入後首頁
+說明：顯示登入者資訊、角色權限、快捷操作與案件統計；Submitter 僅可查看自己提報的案件。
+
+![Submitter Dashboard](docs/submitter-dashboard.png)
+
+#### 2. 案件列表
+說明：支援案件列表查詢、狀態篩選、關鍵字搜尋與問題類別占比圖表，方便業務快速追蹤自己提報的案件。
+
+![Submitter Ticket List](docs/submitter-ticket-list.png)
+
+#### 3. 新增案件
+說明：提供案件提報入口，支援案件標題、問題類別、學員資訊、Tutor、案件內容說明、附件上傳與是否歸還點數等欄位。
+
+![Submitter Create Ticket](docs/submitter-create-ticket.png)
+
+#### 4. 自動優先級判斷
+說明：依問題類別自動帶出建議優先級，減少提交者判斷負擔，並讓客服能快速辨識需要優先處理的案件。
+
+![Submitter Priority Logic](docs/submitter-priority-logic.png)
+
+#### 5. 案件明細
+說明：可查看案件基本資料、附件、留言記錄與狀態歷程，完整呈現案件處理過程。
+
+![Submitter Ticket Detail](docs/submitter-ticket-detail.png)
+
+---
+
+### Agent（客服）
+
+#### 1. 登入後首頁
+說明：客服角色可查看全部案件，並透過首頁快速進入案件列表與處理流程。
+
+![Agent Dashboard](docs/agent-dashboard.png)
+
+#### 2. 案件列表
+說明：客服可查看全部案件，並透過篩選與搜尋快速定位案件，協助案件分流與追蹤。
+
+![Agent Ticket List](docs/agent-ticket-list.png)
+
+#### 3. 案件明細與處理功能
+說明：客服可於案件明細頁更新案件狀態、調整是否歸還點數，並新增內部備註或對外留言。
+
+![Agent Ticket Detail](docs/agent-ticket-detail.png)
+
+#### 4. 站內通知提醒
+說明：新案件、新留言等事件會透過站內提醒通知客服，降低漏接案件風險。
+
+![Agent Notifications](docs/agent-notifications.png)
+
+---
+
+### Admin（主管）
+
+#### 1. 登入後首頁
+說明：主管角色除可查看全部案件外，另提供 KPI 報表等管理功能入口。
+
+![Admin Dashboard](docs/admin-dashboard.png)
+
+#### 2. KPI 報表
+說明：主管可依日期區間查看客服人員已結案件數量統計，作為追蹤處理量與管理參考。
+
+![Admin KPI Report](docs/admin-kpi-report.png)
+
+#### 3. 案件明細與內部資訊
+說明：主管可查看案件明細與客服端可見的內部備註資訊，作為案件追蹤、溝通與管理參考；此類內部資訊不對提交者（業務）開放。
+
+![Admin Ticket Detail](docs/admin-ticket-detail.png)
+
+---
+
 ## CloudWatch 監控與維運
 
-使用 AWS CloudWatch 建立 EC2 監控儀表板（AWS-CaseSystem-Monitor），  
-集中追蹤主機效能與資源使用狀況，實作雲端系統的可觀測性。
+使用 AWS CloudWatch 建立 EC2 監控儀表板，  
+集中追蹤主機效能與資源使用狀況，提升服務可觀測性與基本維運能力。
 
-**儀表板監控項目：**
-- CPU Utilization — 主機 CPU 使用率趨勢
-- Network Traffic — NetworkIn / NetworkOut 流量
-- EBS Read / Write Bytes — 磁碟讀寫負載
-- Network Packets — 封包進出數量
-- EC2 Status Checks — 系統層與執行個體層健康狀態
-- Alarm Overview — 告警狀態總覽
+### 儀表板監控項目
 
-**告警設定：**
+- CPU Utilization：主機 CPU 使用率趨勢
+- Network Traffic：NetworkIn / NetworkOut 流量
+- EBS Read / Write Bytes：磁碟讀寫負載
+- EC2 Status Checks：系統層與執行個體層健康狀態
+- Alarm Overview：告警狀態總覽
+
+### 告警設定
+
 - `CPU-High-Alert`：CPU 使用率超過閾值時觸發
 - `EC2-Status-Check-Failed`：EC2 狀態檢查失敗時觸發
-- 兩者皆整合 Amazon SNS，異常發生時自動發送 Email 通知
+- 整合 Amazon SNS，異常發生時自動發送 Email 通知
 
-![CloudWatch 監控儀表板](docs/cloudwatch-dashboard.png)
+![CloudWatch Dashboard](docs/cloudwatch-dashboard.png)
 
 ---
 
@@ -140,12 +259,13 @@
 
 | 項目 | 說明 |
 |------|------|
-| 雲端平台 | AWS ap-southeast-2（雪梨） |
+| 雲端平台 | AWS ap-southeast-2（Sydney） |
 | EC2 | t2.micro / Ubuntu 24.04 / Elastic IP |
-| 對外存取 | http://13.54.242.189 |
 | 資料庫 | RDS MySQL（Private Subnet，port 3306） |
-| 備份 | RDS 自動備份啟用 ／ KMS 加密 |
+| 備份 | RDS 自動備份啟用 / KMS 加密 |
 | 儲存 | S3 vic-ticket-attachments |
+
+> 線上展示環境可能因部署調整或成本控管暫時關閉，若無法連線，請以 GitHub 原始碼、系統架構圖與畫面截圖為主。
 
 ---
 
@@ -163,7 +283,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # 3. 安裝依賴
 pip install -r requirements.txt
 
-# 4. 設定環境變數（複製 .env.example 並填入）
+# 4. 設定環境變數
 cp .env.example .env
 
 # 5. 啟動應用
@@ -173,10 +293,7 @@ python app.py
 ### Docker 啟動（選用）
 
 ```bash
-# 建立並啟動容器
 docker compose up --build
-
-# 背景執行
 docker compose up --build -d
 ```
 
@@ -184,16 +301,16 @@ docker compose up --build -d
 
 ## 專案結構
 
-```
+```text
 aws-internal-case-management-system/
-├── app.py                  # 主應用程式
-├── requirements.txt        # 依賴套件
-├── Dockerfile              # Docker 映像設定
-├── docker-compose.yml      # Docker Compose 設定
-├── .env.example            # 環境變數範本
-├── .gitignore              # Git 忽略清單
-├── logs/                   # 應用程式日誌（自動產生）
-├── templates/              # Jinja2 HTML 模板
+├── app.py
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── logs/
+├── templates/
 │   ├── base.html
 │   ├── index.html
 │   ├── ticket_list.html
@@ -202,10 +319,34 @@ aws-internal-case-management-system/
 │   ├── edit_ticket.html
 │   ├── notifications.html
 │   └── admin_stats.html
-└── docs/                   # 專案文件
-    ├── architecture.html   # 系統架構圖
-    └── cloudwatch-dashboard.png
+└── docs/
+    ├── architecture.png
+    ├── cloudwatch-dashboard.png
+    ├── submitter-dashboard.png
+    ├── submitter-ticket-list.png
+    ├── submitter-create-ticket.png
+    ├── submitter-priority-logic.png
+    ├── submitter-ticket-detail.png
+    ├── agent-dashboard.png
+    ├── agent-ticket-list.png
+    ├── agent-ticket-detail.png
+    ├── agent-notifications.png
+    ├── admin-dashboard.png
+    ├── admin-kpi-report.png
+    └── admin-ticket-detail.png
 ```
+
+---
+
+## 專案亮點
+
+- 以真實工作場景為基礎發想，而非單純練習型題目
+- 實作 Submitter / Agent / Admin 三角色權限設計
+- 完成案件建立、追蹤、留言、通知、歷程記錄等完整流程
+- 整合 AWS EC2、RDS、S3、CloudWatch、SNS
+- 使用 Nginx + Gunicorn + Flask 完成部署
+- 導入 CloudWatch 與 SNS 建立基本監控與告警機制
+- 具備從需求分析、資料庫設計、後端開發、部署到維運的完整實作流程
 
 ---
 
