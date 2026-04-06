@@ -441,6 +441,7 @@ aws-internal-case-management-system/
 └── docs/
     ├── architecture.png
     ├── cloudwatch-dashboard.png
+    ├── cloudwatch-rds-dashboard.png
     ├── submitter-dashboard.png
     ├── submitter-ticket-list.png
     ├── submitter-create-ticket.png
