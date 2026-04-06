@@ -175,7 +175,7 @@
 | 容器化 | Docker / Docker Compose |
 | 資料庫 | AWS RDS MySQL 8.4 |
 | 檔案儲存 | AWS S3（Presigned URL） |
-| 伺服器 | AWS EC2 t2.micro（Ubuntu 24.04） |
+| 伺服器 | AWS EC2 t3.micro（Ubuntu 24.04） |
 | 反向代理 | Nginx |
 | 服務管理 | systemd |
 | 權限控管 | AWS IAM Role / Policy |
@@ -406,7 +406,7 @@
 | 項目 | 說明 |
 |------|------|
 | 雲端平台 | AWS ap-southeast-2（Sydney） |
-| EC2 | t2.micro / Ubuntu 24.04 / Elastic IP |
+| EC2 | t3.micro / Ubuntu 24.04 / Elastic IP |
 | 資料庫 | RDS MySQL（Private Subnet，port 3306） |
 | 備份 | RDS 自動備份啟用 / KMS 加密 |
 | 儲存 | S3 vic-ticket-attachments |
