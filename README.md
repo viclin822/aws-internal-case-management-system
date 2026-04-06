@@ -261,6 +261,105 @@
 
 ---
 
+## CI/CD 自動部署
+
+本專案導入 GitHub Actions 建立自動部署流程，讓程式碼 push 後可自動部署至 AWS EC2，降低手動更新造成的遺漏與版本不一致問題。
+
+### 部署流程
+
+1. 開發完成後將程式碼 push 至 GitHub `main` 分支
+2. GitHub Actions workflow 自動觸發
+3. Workflow 透過 SSH 連線至 EC2
+4. EC2 端執行 `git pull origin main` 取得最新版本
+5. 執行 `sudo systemctl restart aws-ticket` 重新啟動應用服務
+
+### 敏感資訊管理
+
+部署所需連線資訊透過 GitHub Secrets 管理，不寫死於程式碼中：
+
+| Secret 名稱 | 說明 |
+|-------------|------|
+| EC2_HOST | EC2 Elastic IP |
+| EC2_USER | SSH 登入使用者名稱 |
+| EC2_SSH_KEY | PEM 私鑰內容 |
+
+### 設定檔位置
+
+`.github/workflows/deploy.yml`
+
+---
+
+## Health Check 與維運設計
+
+本專案提供 `/health` 健康檢查端點，回傳 JSON 格式，同時確認應用程式、資料庫與檔案儲存的連線狀態。
+
+### 回傳範例
+```json
+{"db": "connected", "s3": "connected", "status": "ok"}
+```
+
+### 檢查項目
+
+| 項目 | 說明 |
+|------|------|
+| status | Flask 應用程式是否正常運作 |
+| db | RDS MySQL 連線是否正常 |
+| s3 | S3 儲存桶連線是否正常 |
+
+### 用途
+
+- 部署後快速確認服務是否正常上線
+- 可搭配外部監控工具定期呼叫做存活檢查
+- 展現應用層健康檢查思維，不只確認主機存活，也驗證後端服務連線狀態
+
+### 目前維運設計整體架構
+
+| 元件 | 角色 |
+|------|------|
+| Nginx | 反向代理，統一接收外部 HTTP 請求 |
+| Gunicorn | WSGI Server，承接 Flask 應用服務 |
+| systemd | 管理服務啟動與重啟，降低異常中斷風險 |
+| CloudWatch | 集中查看主機與系統指標 |
+| SNS | 告警觸發時發送 Email 通知 |
+| IAM Role | 讓 EC2 安全存取 AWS 資源，避免長期金鑰外洩 |
+| /health | 應用層健康檢查，同時驗證 DB 與 S3 連線 |
+
+---
+
+## Backup / Recovery 設計
+
+在維運設計上，本專案同時考慮資料備份與異常後的復原需求。
+
+### 資料備份設計
+
+本專案的資料主要分為兩類：
+
+**結構化資料**
+
+案件、留言、通知、使用者等資料儲存在 Amazon RDS MySQL，啟用自動備份與 KMS 加密。
+
+**附件資料**
+
+案件附件儲存在 Amazon S3，透過 Presigned URL 上傳，與主機本身解耦，降低 EC2 磁碟負擔。
+
+### Recovery 思維
+
+| 異常情境 | 對應處理方式 |
+|----------|-------------|
+| 應用服務異常 | systemd 自動重啟服務 |
+| 主機異常 | 重新部署應用程式並接回 RDS / S3 |
+| 資料庫層異常 | 依 RDS 自動備份機制進行還原 |
+| 附件資料 | 集中於 S3，不受應用程式重啟影響 |
+
+### 設計價值
+
+- 應用程式、資料庫、附件儲存三層分離
+- 主機故障時資料不隨之消失
+- 符合「應用層 / 資料層 / 儲存層分離」的維運思維
+- 有利於後續擴充、搬遷與災難復原規劃
+
+---
+
 ## 部署資訊
 
 | 項目 | 說明 |
@@ -353,6 +452,8 @@ aws-internal-case-management-system/
 - 使用 Nginx + Gunicorn + Flask 完成部署
 - 導入 CloudWatch 與 SNS 建立監控儀表板與自動化告警機制
 - 具備從需求分析、資料庫設計、後端開發、部署到維運的完整實作流程
+- 導入 GitHub Actions 實現 push 觸發自動部署至 EC2
+- 提供 /health 端點同時檢查 DB 與 S3 連線狀態
 
 ---
 
