@@ -259,6 +259,20 @@
 
 ![CloudWatch Dashboard](docs/cloudwatch-dashboard.png)
 
+### RDS 監控項目
+
+本專案另於 CloudWatch Dashboard 補充 RDS 監控指標，
+從資料庫層面掌握後端服務狀態。
+
+| 指標 | 說明 |
+|------|------|
+| CPUUtilization | RDS 執行個體 CPU 使用率 |
+| DatabaseConnections | 目前資料庫連線數 |
+| FreeStorageSpace | 剩餘儲存空間 |
+| FreeableMemory | 可用記憶體大小 |
+
+![RDS Monitoring](docs/cloudwatch-rds-dashboard.png)
+
 ---
 
 ## CI/CD 自動部署
