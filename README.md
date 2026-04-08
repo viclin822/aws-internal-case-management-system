@@ -2,9 +2,9 @@
 
 **AWS Internal Case Management System**
 
-> 這是一套針對內部案件協作流程設計的雲端管理系統，  
-> 主要服務對象為業務、客服與主管，解決原本以 Google 表單與表格分散追蹤案件時，  
-> 在權限分流、處理進度追蹤、留言協作、附件整合與歷程管理上的不便。
+> 一套以真實內部案件流程為基礎設計的雲端管理系統，  
+> 整合案件提報、處理協作、權限控管、附件管理、站內通知、狀態追蹤與基礎維運監控。  
+> 系統採用 Flask 開發，部署於 AWS EC2，並結合 RDS、S3、CloudWatch、SNS、Nginx、Gunicorn 與 HTTPS 網域環境。
 
 ---
 
@@ -20,6 +20,7 @@
 - [CloudWatch 監控與維運](#cloudwatch-監控與維運)
 - [CI/CD 自動部署](#cicd-自動部署)
 - [Health Check 與維運設計](#health-check-與維運設計)
+- [HTTPS / SSL 部署](#https--ssl-部署)
 - [Backup / Recovery 設計](#backup--recovery-設計)
 - [部署資訊](#部署資訊)
 - [本機開發環境設定](#本機開發環境設定)
@@ -31,44 +32,35 @@
 
 ## 專案簡介
 
-本專案為一套以真實工作場景為基礎發想的內部案件管理系統，  
-聚焦於「案件提報、案件處理、狀態追蹤、站內通知、權限控管、統計報表」等核心需求。
+本專案是一套以真實工作情境為基礎發想的內部案件管理系統，  
+聚焦於案件提報、案件處理、狀態追蹤、留言協作、附件整合、站內通知與權限控管等核心需求。
 
-系統依不同使用角色區分權限範圍：
+系統依角色區分權限範圍：
 
 - **Submitter（業務）**：提交案件、查看自己案件、追蹤進度
 - **Agent（客服）**：查看全部案件、更新狀態、留言協作、處理案件
 - **Admin（主管）**：完整權限、KPI 報表、管理使用者
 
 本專案整合 AWS EC2、RDS、S3、CloudWatch、SNS 等服務，  
-實作從需求發想到資料庫設計、功能開發、雲端部署與基礎維運監控的完整流程。
+完成從需求發想、資料庫設計、功能開發到雲端部署與基礎維運監控的實作流程。
 
 ---
 
 ## 專案動機
 
-目前第一線客服與業務回報流程，常透過 Google 表單提交、表格追蹤進度。  
-雖然能完成基本紀錄，但在角色權限分流、案件狀態管理、留言協作、附件整合與歷程追蹤上仍有整合空間。
+在實際工作情境中，第一線客服與業務的案件回報流程，常透過 Google 表單提交、Google 試算表追蹤進度。  
+雖能完成基本紀錄，但在角色權限分流、案件狀態管理、留言協作、附件整合與歷程追蹤上，仍有整合與優化空間。
 
-因此，我以真實工作場景為基礎，獨立設計並實作此內部案件管理系統，  
+因此，我以真實內部協作流程為出發點，獨立設計並實作此系統，  
 希望將原本分散的提報、處理與追蹤流程整合為單一平台。
 
 ---
 
 ## 專案定位
 
-本專案並非課程指定作業，而是在 AWS 雲端工程師培訓正式個人專題啟動前，  
-為驗證自己在系統開發與維運方向的能力，主動完成的實作作品。
-
-專案重點不只是完成功能頁面，而是同時納入：
-
-- 角色權限控管（RBAC）
-- 案件流程設計
-- 附件儲存整合
-- 狀態歷程記錄
-- 站內通知機制
-- AWS 雲端部署
-- CloudWatch 監控與 SNS 告警
+本專案為依真實工作情境延伸的自主實作作品，並非課程指定作業。  
+除了功能開發外，也著重於角色權限設計、案件流程拆解、雲端部署、監控告警與基本維運設計，  
+作為驗證自己在系統開發與維運方向能力的實作成果。
 
 ---
 
@@ -101,14 +93,14 @@
 ### 站內通知系統
 
 - 導覽列鈴鐺圖示，即時顯示未讀通知紅點
-- 新案件建立 → 通知 Agent / Admin
-- 案件狀態更新 → 通知 Submitter
-- 新增留言 → 通知相關人員
-- 歸還點數狀態更新 → 通知 Submitter
+- 新案件建立後通知 Agent / Admin
+- 案件狀態更新後通知 Submitter
+- 新增留言後通知相關人員
+- 歸還點數狀態更新後通知 Submitter
 - 通知分類標籤（新案件 / 狀態更新 / 新留言 / 歸還點數）
 - 點擊通知可跳轉對應案件
 - 一鍵全部已讀
-- 通知中心頁面（查看完整歷史通知）
+- 通知中心頁面可查看完整歷史通知
 
 ---
 
@@ -120,48 +112,39 @@
 
 系統採用 AWS 雲端部署，主要架構如下：
 
-- 使用者透過瀏覽器以 HTTP 存取系統
-- 請求先進入 EC2 上的 **Nginx**
+- 使用者透過瀏覽器以 **HTTPS** 存取系統
+- 外部請求先進入 EC2 上的 **Nginx**
+- Nginx 負責 **HTTP 轉 HTTPS** 與 **SSL Termination**
 - Nginx 反向代理至 **Gunicorn**
 - Gunicorn 執行 **Flask Web Application**
-- 應用程式連接 **AWS RDS MySQL**
-- 附件檔案透過 **AWS S3 Presigned URL** 上傳
-- 主機與應用監控透過 **CloudWatch**
+- 應用程式連接 **Amazon RDS MySQL**
+- 附件檔案透過 **Amazon S3 Presigned URL** 上傳
+- 主機與資料庫監控透過 **Amazon CloudWatch**
 - 異常告警透過 **Amazon SNS** 發送通知
+- CI/CD 透過 **GitHub Actions** 自動部署至 EC2
 
 ### AWS 服務架構
 
 ```text
-使用者（瀏覽器）
-    │ HTTP port 80
-    ▼
-┌─────────────────────────────── AWS VPC ───────────────────────────────┐
-│  ┌─────────────────── Public Subnet ──────────────────────────────┐   │
-│  │  ┌─────────────── Amazon EC2（t3.micro）──────────────────┐    │   │
-│  │  │  Nginx（反向代理）port 80                             │    │   │
-│  │  │        │                                               │    │   │
-│  │  │        ▼                                               │    │   │
-│  │  │  Gunicorn（WSGI Server）port 5000                     │    │   │
-│  │  │        │                                               │    │   │
-│  │  │        ▼                                               │    │   │
-│  │  │  Flask Web Application（app.py）                      │    │   │
-│  │  │                                                        │    │   │
-│  │  │  IAM Role ／ systemd（aws-ticket.service）            │    │   │
-│  │  └────────────────────────────────────────────────────────┘    │   │
-│  └────────────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────── Private Subnet ─────────────────────────────┐   │
-│  │  Amazon RDS MySQL（SG: port 3306，EC2 專屬存取）               │   │
-│  └────────────────────────────────────────────────────────────────┘   │
-└───────────────────────────────────────────────────────────────────────┘
-         │ Presigned URL                    │ 指標送出
-         ▼                                  ▼
-   Amazon S3                        Amazon CloudWatch
-   vic-ticket-attachments           AWS-CaseSystem-Monitor 儀表板
-   （VPC 外，全球服務）              CPU ／ 狀態檢查警報
-                                          │ 警報觸發
-                                          ▼
-                                    Amazon SNS
-                                    Email 告警通知
+使用者（Browser）
+        │ HTTPS 443
+        ▼
+  Nginx（Reverse Proxy / SSL Termination）
+        │
+        ▼
+  Gunicorn（內部 port 5000）
+        │
+        ▼
+  Flask Web Application
+     ├─ Amazon RDS MySQL
+     ├─ Amazon S3（Presigned URL）
+     ├─ Amazon CloudWatch
+     └─ Amazon SNS
+
+GitHub Actions
+        │ SSH Deploy
+        ▼
+      Amazon EC2
 ```
 
 ---
@@ -172,16 +155,18 @@
 |------|------|
 | 後端 | Python Flask |
 | WSGI 伺服器 | Gunicorn |
-| 容器化 | Docker / Docker Compose |
-| 資料庫 | AWS RDS MySQL 8.4 |
-| 檔案儲存 | AWS S3（Presigned URL） |
-| 伺服器 | AWS EC2 t3.micro（Ubuntu 24.04） |
+| 本機開發 / 測試 | Docker / Docker Compose |
+| 資料庫 | Amazon RDS MySQL 8.4 |
+| 檔案儲存 | Amazon S3（Presigned URL） |
+| 伺服器 | Amazon EC2 t3.micro（Ubuntu 24.04） |
 | 反向代理 | Nginx |
 | 服務管理 | systemd |
 | 權限控管 | AWS IAM Role / Policy |
 | 網路 | AWS VPC / Public & Private Subnet / Security Group |
-| 監控 | AWS CloudWatch + Amazon SNS |
+| 監控 | Amazon CloudWatch + Amazon SNS |
+| SSL | Let's Encrypt + Certbot |
 | 版本控管 | Git / GitHub |
+| CI/CD | GitHub Actions |
 
 ---
 
@@ -261,8 +246,8 @@
 
 ## CloudWatch 監控與維運
 
-使用 AWS CloudWatch 建立 **AWS-CaseSystem-Monitor** 儀表板，  
-集中追蹤主機效能與資源使用狀況，提升服務可觀測性與基本維運能力。
+本專案使用 Amazon CloudWatch 建立 **AWS-CaseSystem-Monitor** 儀表板，  
+集中追蹤主機與資料庫的關鍵指標，提升服務可觀測性與基礎維運能力。
 
 ### 儀表板監控項目
 
@@ -356,13 +341,39 @@
 
 | 元件 | 角色 |
 |------|------|
-| Nginx | 反向代理，統一接收外部 HTTP 請求 |
+| Nginx | 統一接收外部流量，處理 HTTPS 與反向代理 |
 | Gunicorn | WSGI Server，承接 Flask 應用服務 |
 | systemd | 管理服務啟動與重啟，降低異常中斷風險 |
-| CloudWatch | 集中查看主機與系統指標 |
+| CloudWatch | 集中查看主機與資料庫指標 |
 | SNS | 告警觸發時發送 Email 通知 |
-| IAM Role | 讓 EC2 安全存取 AWS 資源，避免長期金鑰外洩 |
+| IAM Role | 讓 EC2 安全存取 AWS 資源，避免長期金鑰暴露 |
 | /health | 應用層健康檢查，同時驗證 DB 與 Amazon S3 連線 |
+
+---
+
+## HTTPS / SSL 部署
+
+本專案已完成正式 HTTPS 部署，網站可透過自訂網域安全存取：
+
+- 網域：`vic-ticket.duckdns.org`
+- 存取網址：`https://vic-ticket.duckdns.org`
+- Reverse Proxy：Nginx
+- SSL 憑證：Let's Encrypt
+- 憑證管理工具：Certbot
+- 自動續約：已設定
+
+### 部署方式
+
+- 使用 DuckDNS 綁定自訂網域至 EC2 Elastic IP
+- 由 Nginx 接收外部 `80 / 443` 請求
+- 將 HTTP 自動導向 HTTPS
+- 由 Nginx 終止 SSL，並反向代理至內部 Gunicorn / Flask 服務
+
+### 設計價值
+
+- 提升資料傳輸安全性
+- 建立較接近正式環境的對外存取方式
+- 搭配 Certbot 自動續約，降低憑證過期風險
 
 ---
 
@@ -389,7 +400,7 @@
 | 應用服務異常 | systemd 自動重啟服務 |
 | 主機異常 | 重新部署應用程式並接回 RDS / S3 |
 | 資料庫層異常 | 依 RDS 自動備份機制進行還原 |
-| 附件資料 | 集中於 S3，不受應用程式重啟影響 |
+| 附件資料異常 | 由 S3 集中管理，不受應用程式重啟影響 |
 
 ### 設計價值
 
@@ -407,9 +418,13 @@
 |------|------|
 | 雲端平台 | AWS ap-southeast-2（Sydney） |
 | EC2 | t3.micro / Ubuntu 24.04 / Elastic IP |
-| 資料庫 | RDS MySQL（Private Subnet，port 3306） |
+| 網域 / 存取方式 | `https://vic-ticket.duckdns.org` |
+| 反向代理 | Nginx |
+| WSGI | Gunicorn |
+| 資料庫 | Amazon RDS MySQL（Private Subnet，port 3306） |
+| SSL 憑證 | Let's Encrypt（Certbot 自動續約） |
 | 備份 | RDS 自動備份啟用 / KMS 加密 |
-| 儲存 | S3 vic-ticket-attachments |
+| 儲存 | Amazon S3 `vic-ticket-attachments` |
 
 > 線上展示環境可能因部署調整或成本控管暫時關閉，若無法連線，請以 GitHub 原始碼、系統架構圖與畫面截圖為主。
 
@@ -492,8 +507,9 @@ aws-internal-case-management-system/
 - 以真實工作場景為基礎發想，而非單純練習型題目
 - 實作 Submitter / Agent / Admin 三角色權限設計
 - 完成案件建立、追蹤、留言、通知、歷程記錄等完整流程
-- 整合 AWS EC2、RDS、S3、CloudWatch、SNS 完成雲端部署
-- 使用 Nginx + Gunicorn + Flask 完成部署架構
+- 整合 Amazon EC2、RDS、S3、CloudWatch、SNS 完成雲端部署
+- 使用 Nginx + Gunicorn + Flask 建立正式部署架構
+- 導入 HTTPS / SSL（Let's Encrypt + Certbot）提升服務安全性
 - 導入 CloudWatch 與 SNS 建立監控儀表板與自動化告警機制
 - 導入 GitHub Actions 實現 push 觸發自動部署至 EC2
 - 提供 `/health` 端點同時檢查 DB 與 Amazon S3 連線狀態
